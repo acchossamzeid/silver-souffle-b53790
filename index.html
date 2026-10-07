@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0E5A6B">
+<title>نظام مندوبي الزيوت</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F3F5F4;--surface:#fff;--ink:#13222B;--muted:#5B6B73;--line:#D6DDE0;--pet:#0E5A6B;--pet-ink:#fff;--pet-soft:#DCEBEE;
+--amber:#B97F00;--amber-fill:#E0A21B;--amber-bg:#FFF1CC;--red:#B3302F;--red-bg:#FBE4E3;--green:#1F7044;--green-bg:#DDF1E5;--shadow:0 1px 0 rgba(19,34,43,.06);}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0E171C;--surface:#16232A;--ink:#E6EEF1;--muted:#9BB0B8;--line:#2A3C45;--pet:#4FB3C8;--pet-ink:#06232B;--pet-soft:#183842;--amber:#F0B93A;--amber-fill:#E9B03A;--amber-bg:#3A2F0F;--red:#F07A78;--red-bg:#3C1B1B;--green:#5CCB8A;--green-bg:#123222;}}
+:root[data-theme="dark"]{--bg:#0E171C;--surface:#16232A;--ink:#E6EEF1;--muted:#9BB0B8;--line:#2A3C45;--pet:#4FB3C8;--pet-ink:#06232B;--pet-soft:#183842;--amber:#F0B93A;--amber-fill:#E9B03A;--amber-bg:#3A2F0F;--red:#F07A78;--red-bg:#3C1B1B;--green:#5CCB8A;--green-bg:#123222;}
+*{box-sizing:border-box}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+html,body{margin:0;height:auto;background:var(--bg);color:var(--ink);font:400 16px/1.5 "IBM Plex Sans Arabic","Segoe UI",Tahoma,system-ui,sans-serif;-webkit-text-size-adjust:100%}
+button,input,select,textarea{font:inherit;color:inherit}
+h1,h2,h3{margin:0;line-height:1.25}h1{font-size:1.45rem;font-weight:700}h2{font-size:1.15rem;font-weight:700}h3{font-size:1rem;font-weight:600}
+a{color:var(--pet)}
+.muted{color:var(--muted)}.small{font-size:.85rem}.num{font-variant-numeric:tabular-nums;direction:ltr;unicode-bidi:isolate;display:inline-block}
+.row{display:flex;gap:.6rem;align-items:center}.between{justify-content:space-between}.wrap{flex-wrap:wrap}.grow{flex:1;min-width:0}.col{display:flex;flex-direction:column;gap:.6rem}
+.stack>*+*{margin-top:.8rem}
+:focus-visible{outline:3px solid var(--pet);outline-offset:2px}
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;min-height:48px;padding:.6rem 1.1rem;border-radius:10px;border:1.5px solid var(--pet);background:var(--pet);color:var(--pet-ink);font-weight:600;cursor:pointer;text-decoration:none}
+.btn.ghost{background:transparent;color:var(--pet)}.btn.danger{background:var(--red);border-color:var(--red);color:#fff}
+.btn.sm{min-height:36px;padding:.25rem .7rem;font-size:.9rem;border-radius:8px}.btn.block{display:flex;width:100%}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+/* surfaces */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:1rem;box-shadow:var(--shadow)}
+.card.tap{cursor:pointer}
+.list>*+*{margin-top:.6rem}
+.field{display:flex;flex-direction:column;gap:.3rem}.field label{font-size:.85rem;color:var(--muted);font-weight:500}
+input,select,textarea{width:100%;min-height:46px;padding:.5rem .7rem;border:1.5px solid var(--line);border-radius:10px;background:var(--surface)}
+input[type=checkbox],input[type=radio]{width:auto;min-height:0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
+/* chips */
+.chip{display:inline-flex;align-items:center;gap:.3rem;padding:.1rem .6rem;border-radius:99px;font-size:.78rem;font-weight:600;background:var(--pet-soft);color:var(--pet);white-space:nowrap}
+.chip.ok{background:var(--green-bg);color:var(--green)}.chip.warn{background:var(--amber-bg);color:var(--amber)}.chip.bad{background:var(--red-bg);color:var(--red)}.chip.grey{background:var(--bg);color:var(--muted);border:1px solid var(--line)}
+.dot{width:.7rem;height:.7rem;border-radius:50%;background:currentColor;display:inline-block}
+/* banners */
+.banner{display:flex;align-items:center;gap:.6rem;padding:.7rem .9rem;border-radius:10px;font-weight:600;cursor:pointer}
+.banner.ok{background:var(--green-bg);color:var(--green)}.banner.warn{background:var(--amber-bg);color:var(--amber)}.banner.bad{background:var(--red-bg);color:var(--red)}
+.note{padding:.6rem .8rem;border-radius:10px;font-size:.9rem}.note.warn{background:var(--amber-bg);color:var(--amber)}.note.bad{background:var(--red-bg);color:var(--red)}.note.info{background:var(--pet-soft);color:var(--pet)}
+/* dipstick: the one memorable element */
+.dip{margin-top:.5rem}
+.dip-rod{position:relative;height:34px;border-radius:6px;background:var(--bg);border:1.5px solid var(--ink);overflow:hidden;
+ background-image:repeating-linear-gradient(to right,transparent 0,transparent calc(10% - 1.5px),var(--line) calc(10% - 1.5px),var(--line) 10%)}
+.dip-fill{position:absolute;inset-block:0;inset-inline-start:0;background:var(--amber-fill);opacity:.92;transition:width .6s ease}
+.dip-fill::after{content:"";position:absolute;inset-inline-end:0;inset-block:0;width:3px;background:var(--ink)}
+.dip-scale{display:flex;justify-content:space-between;font-size:.75rem;color:var(--muted);margin-top:.25rem}
+.dip-num{font-size:2rem;font-weight:700;line-height:1.1}
+/* rep shell */
+.rep{max-width:520px;margin:0 auto;min-height:100vh;padding-bottom:84px}
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg);display:flex;align-items:center;gap:.6rem;padding:.7rem 1rem;border-bottom:1px solid var(--line)}
+.top h1{font-size:1.15rem;flex:1}
+.pad{padding:1rem}
+.nav{position:fixed;inset-inline:0;bottom:env(safe-area-inset-bottom,0px);z-index:30;background:var(--surface);border-top:1px solid var(--line);display:flex;max-width:520px;margin:0 auto}
+.nav button{flex:1;min-height:60px;border:0;background:none;color:var(--muted);font-size:.78rem;font-weight:600;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer}
+.nav button.on{color:var(--pet);box-shadow:inset 0 3px 0 var(--pet)}
+.nav svg{width:22px;height:22px}
+.bigbtns{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
+.bigbtn{min-height:92px;border-radius:14px;border:1.5px solid var(--line);background:var(--surface);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.35rem;font-weight:700;cursor:pointer;color:var(--ink)}
+.bigbtn.primary{background:var(--pet);border-color:var(--pet);color:var(--pet-ink)}
+.bigbtn svg{width:28px;height:28px}
+.stat{flex:1;min-width:0}.stat>b{display:block;font-size:1.35rem}.stat>span{font-size:.8rem;color:var(--muted)}
+.stepper{display:flex;align-items:center;gap:.4rem}.stepper button{width:44px;height:44px;border-radius:10px;border:1.5px solid var(--pet);background:var(--surface);color:var(--pet);font-size:1.4rem;font-weight:700;cursor:pointer}
+.stepper b{min-width:2.2rem;text-align:center;font-size:1.1rem}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);border:1.5px solid var(--pet);border-radius:10px;overflow:hidden}
+.seg button{min-height:46px;border:0;background:var(--surface);color:var(--pet);font-weight:600;cursor:pointer}.seg button.on{background:var(--pet);color:var(--pet-ink)}
+/* admin shell */
+.adm{display:grid;grid-template-columns:230px 1fr;min-height:100vh}
+.side{background:var(--surface);border-inline-end:1px solid var(--line);padding:1rem .6rem;position:sticky;top:0;align-self:start;height:100vh;overflow:auto}
+.side h2{padding:.3rem .6rem 1rem}.side button{display:block;width:100%;text-align:start;padding:.6rem .7rem;border:0;background:none;border-radius:8px;color:var(--ink);font-weight:500;cursor:pointer}
+.side button.on{background:var(--pet-soft);color:var(--pet);font-weight:700}
+.main{padding:1.2rem 1.4rem;min-width:0}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.7rem}
+.kpi>b{display:block;font-size:1.6rem}.kpi>span{color:var(--muted);font-size:.85rem}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.92rem}th,td{padding:.55rem .75rem;text-align:start;border-bottom:1px solid var(--line);vertical-align:middle}
+th{font-weight:600;color:var(--muted);font-size:.8rem;background:var(--bg);white-space:nowrap}tr:last-child td{border-bottom:0}
+.bar{height:10px;background:var(--bg);border-radius:6px;overflow:hidden;border:1px solid var(--line)}.bar i{display:block;height:100%;background:var(--amber-fill)}
+@media (max-width:860px){.adm{grid-template-columns:1fr}.side{position:static;height:auto;display:flex;overflow-x:auto;gap:.3rem;padding:.5rem;border-inline-end:0;border-bottom:1px solid var(--line)}.side h2{display:none}.side button{white-space:nowrap;width:auto}.main{padding:1rem}}
+/* modal + toast + login */
+.scrim{position:fixed;inset:0;background:rgba(8,16,20,.55);z-index:60;display:flex;align-items:flex-end;justify-content:center}
+.modal{background:var(--surface);width:100%;max-width:520px;max-height:92vh;overflow:auto;border-radius:16px 16px 0 0;padding:1.1rem}
+@media (min-width:700px){.scrim{align-items:center}.modal{border-radius:16px}}
+.toast{position:fixed;inset-inline:1rem;bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:80;max-width:480px;margin:0 auto;padding:.8rem 1rem;border-radius:10px;background:var(--ink);color:var(--bg);font-weight:600;text-align:center}
+.toast.bad{background:var(--red);color:#fff}
+.login{max-width:520px;margin:0 auto;padding:1.5rem 1rem}
+.who{display:flex;align-items:center;gap:.8rem;width:100%;text-align:start;padding:.8rem 1rem;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);cursor:pointer;min-height:64px}
+.who:hover{border-color:var(--pet)}
+.avatar{width:42px;height:42px;border-radius:50%;background:var(--pet-soft);color:var(--pet);display:grid;place-items:center;font-weight:700}
+.hide-print{}
+@media print{.top,.nav,.hide-print,.toast{display:none!important}.rep{padding:0;max-width:none}body{background:#fff}.card{border:0;box-shadow:none}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+.m{white-space:nowrap}
+.row.between>span:first-child,.row.between>div:first-child{min-width:0}
+
+</style>
+<script src="config.js"></script>
+</head>
+<body>
+<div id="root"></div>
+<script>
+// ===================== utilities =====================
+const mem = {};
+const store = {
+  get(k){ try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : (mem[k] ? JSON.parse(mem[k]) : null); } catch(e){ return mem[k] ? JSON.parse(mem[k]) : null; } },
+  set(k,v){ const s = JSON.stringify(v); mem[k] = s; try { localStorage.setItem(k, s); } catch(e){} },
+  del(k){ delete mem[k]; try { localStorage.removeItem(k); } catch(e){} }
+};
+const r2 = n => Math.round((n + Number.EPSILON) * 100) / 100;
+const uuid = () => (window.crypto && crypto.randomUUID) ? crypto.randomUUID()
+  : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random()*16|0; return (c==='x'?r:(r&3|8)).toString(16); });
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const clone = o => JSON.parse(JSON.stringify(o));
+function haversine(a, b){
+  const R = 6371000, d = x => x*Math.PI/180;
+  const dLat = d(b.lat-a.lat), dLng = d(b.lng-a.lng);
+  const h = Math.sin(dLat/2)**2 + Math.cos(d(a.lat))*Math.cos(d(b.lat))*Math.sin(dLng/2)**2;
+  return 2*R*Math.asin(Math.sqrt(h));
+}
+class BizError extends Error {}   // server rejected (HTTP 4xx): do not blindly retry
+class NetError extends Error {}   // no connection / lost response: safe to retry
+const biz = m => new BizError(m);
+
+// Asia/Riyadh helpers (storage is UTC ISO strings)
+const RYD = 'Asia/Riyadh';
+const dayKey = iso => new Date(iso).toLocaleDateString('en-CA', { timeZone: RYD });
+const monthKey = iso => dayKey(iso).slice(0,7);
+const todayKey = () => dayKey(new Date().toISOString());
+
+
+// Views (security-invoker): computed on the caller's snapshot. Shared by demo and Supabase builds.
+const VIEWS = {
+    kpi(s, month){
+      return s.targets.filter(t => t.month === month).map(t => {
+        const u = s.users.find(x => x.id === t.rep_id) || {};
+        const cashSale = s.invoices.filter(i => i.rep_id===t.rep_id && i.status==='posted' && monthKey(i.synced_at)===month).reduce((a,i)=>a+i.paid_at_sale,0);
+        const coll = s.colls.filter(c => c.rep_id===t.rep_id && monthKey(c.collected_at)===month).reduce((a,c)=>a+c.amount,0);
+        const cartons = s.invoices.filter(i => i.rep_id===t.rep_id && i.status==='posted' && monthKey(i.synced_at)===month).reduce((a,i)=>a+i.items.reduce((b,x)=>b+x.qty,0),0);
+        const total = r2(cashSale + coll);
+        return { rep_id:t.rep_id, name:u.full_name, target:t.collection_target, collected:total, pct:t.collection_target ? Math.round(1000*total/t.collection_target)/10 : 0, cartons, carton_target:t.carton_target };
+      });
+    },
+    lowStock(s){ return s.wh.filter(w => w.qty <= w.reorder).map(w => ({ ...w, product:s.products.find(p => p.id===w.product_id) })); },
+    outstanding(s){
+      return s.customers.map(c => {
+        const inv = s.invoices.filter(i => i.customer_id===c.id && i.status==='posted' && i.balance_due>0);
+        const op = s.open.filter(o => o.customer_id===c.id && o.balance_due>0);
+        const out = r2(inv.reduce((a,i)=>a+i.balance_due,0) + op.reduce((a,o)=>a+o.balance_due,0));
+        const dues = [...inv, ...op].map(x => x.due_date).filter(Boolean).sort();
+        return { customer:c, outstanding:out, oldest_due:dues[0]||null };
+      }).filter(x => x.outstanding > 0);
+    },
+    reconcile(s){
+      const bad = [];
+      s.van.forEach(v => { const sum = s.moves.filter(m => m.location==='van' && m.rep_id===v.rep_id && m.product_id===v.product_id).reduce((a,m)=>a+m.delta,0); if (sum !== v.qty) bad.push({ location:'van', rep_id:v.rep_id, product_id:v.product_id, balance:v.qty, ledger:sum }); });
+      s.wh.forEach(w => { const sum = s.moves.filter(m => m.location==='warehouse' && m.product_id===w.product_id).reduce((a,m)=>a+m.delta,0); if (sum !== w.qty) bad.push({ location:'warehouse', product_id:w.product_id, balance:w.qty, ledger:sum }); });
+      return bad;
+    },
+    cashExpectedToday(s){
+      const today = todayKey();
+      return s.users.filter(u => u.role==='rep' && u.active).map(u => ({ rep:u,
+        amount: r2(s.invoices.filter(i => i.rep_id===u.id && i.status==='posted' && dayKey(i.synced_at)===today).reduce((a,i)=>a+(i.payment_type!=='credit'?i.paid_at_sale:0),0)
+          + s.colls.filter(c => c.rep_id===u.id && c.method==='cash' && dayKey(c.collected_at)===today).reduce((a,c)=>a+c.amount,0)) }));
+    }
+  };
+
+// ===================== Supabase data layer (production build) =====================
+const CFG = window.OILREP_CONFIG || {};
+class AuthExpired extends NetError {}          // keeps queued work pending; the user just signs in again
+const Net = { offline:false, loseNext:0, latency:0, blocked(){ return false; } };   // real fetch errors decide connectivity
+const configOk = () => CFG.SUPABASE_URL && CFG.SUPABASE_ANON_KEY && !/YOUR-|PASTE/i.test(CFG.SUPABASE_URL + CFG.SUPABASE_ANON_KEY);
+
+const Auth = {
+  session: store.get('oilrep.session'), expired:false,
+  save(s){ this.session = s; store.set('oilrep.session', s); },
+  async _token(grant, body){
+    let res; try { res = await fetch(CFG.SUPABASE_URL + '/auth/v1/token?grant_type=' + grant, { method:'POST', headers:{ apikey:CFG.SUPABASE_ANON_KEY, 'Content-Type':'application/json' }, body:JSON.stringify(body) }); }
+    catch(e){ throw new NetError('network'); }
+    if (res.status >= 500) throw new NetError('auth server');
+    const j = await res.json().catch(() => ({}));
+    if (!res.ok) throw new BizError(j.error_description || j.msg || j.message || 'login failed');
+    this.save({ access_token:j.access_token, refresh_token:j.refresh_token, expires_at:Date.now() + (j.expires_in || 3600) * 1000, uid:j.user.id });
+    this.expired = false; return this.session;
+  },
+  login(email, password){ return this._token('password', { email:email.trim(), password }); },
+  async refresh(){
+    if (!this.session) throw new AuthExpired('no session');
+    try { return await this._token('refresh_token', { refresh_token:this.session.refresh_token }); }
+    catch(e){ if (e instanceof BizError) { this.expired = true; throw new AuthExpired('session expired'); } throw e; }
+  },
+  async token(){
+    if (!this.session) { this.expired = true; throw new AuthExpired('no session'); }
+    if (Date.now() > this.session.expires_at - 60000) await this.refresh();
+    return this.session.access_token;
+  },
+  logout(){ this.session = null; this.expired = false; store.del('oilrep.session'); }
+};
+
+async function rest(method, path, body, headers, retried){
+  const tok = await Auth.token();
+  let res;
+  try {
+    res = await fetch(CFG.SUPABASE_URL + '/rest/v1/' + path, { method, headers:{ apikey:CFG.SUPABASE_ANON_KEY, Authorization:'Bearer ' + tok, 'Content-Type':'application/json', ...(headers || {}) }, body:body === undefined ? undefined : JSON.stringify(body) });
+  } catch(e){ Net.offline = true; throw new NetError('network'); }
+  Net.offline = false;
+  if (res.status === 401 && !retried) { await Auth.refresh(); return rest(method, path, body, headers, true); }
+  if (res.status === 401) { Auth.expired = true; throw new AuthExpired('unauthorized'); }
+  if (res.status >= 500) throw new NetError('server ' + res.status);
+  const txt = await res.text(); let j = null; try { j = txt ? JSON.parse(txt) : null; } catch(e){}
+  if (!res.ok) throw new BizError(res.status === 403 ? t('not_allowed') : ((j && j.message) || 'HTTP ' + res.status));
+  return j;
+}
+
+// app operation name -> real database call
+const rpc = (fn, args) => rest('POST', 'rpc/' + fn, args);
+const patchOne = async (path, body) => { const r = await rest('PATCH', path, body, { Prefer:'return=representation' }); if (!r || !r.length) throw new BizError(t('not_allowed')); return {}; };
+const OPS = {
+  request_transfer:p => rpc('request_transfer', { p_client_uuid:p.client_uuid, p_items:p.items, p_notes:p.notes || null }),
+  dispatch_transfer:p => rpc('dispatch_transfer', { p_transfer_id:p.transfer_id }),
+  receive_transfer:p => rpc('receive_transfer', { p_transfer_id:p.transfer_id, p_received:p.received }),
+  submit_invoice:p => rpc('submit_invoice', { p }),
+  record_collection:p => rpc('record_collection', { p }),
+  add_customer:p => rpc('add_customer', { p }),
+  import_opening_receivable:p => rpc('import_opening_receivable', { p_customer:p.customer_id, p_amount:p.amount, p_due:p.due_date, p_note:p.note || null }),
+  receive_from_supplier:p => rpc('receive_from_supplier', { p_product:p.product_id, p_qty:p.qty, p_note:p.note || null }),
+  adjust_stock:p => rpc('adjust_stock', { p_location:p.location, p_product:p.product_id, p_rep:p.rep_id || null, p_delta:p.delta, p_reason:p.reason }),
+  resolve_stock_exception:p => rpc('resolve_stock_exception', { p_id:p.id, p_note:p.note }),
+  cancel_transfer:p => rpc('cancel_transfer', { p_transfer_id:p.transfer_id }),
+  resolve_dispute:p => rpc('resolve_dispute', { p_transfer_id:p.transfer_id, p_note:p.note }),
+  admin_set_customer:p => patchOne('customers?id=eq.' + p.id, { ...(p.credit_limit != null ? { credit_limit:p.credit_limit } : {}), ...(p.active != null ? { is_active:p.active } : {}) }),
+  admin_set_reorder:p => patchOne('warehouse_inventory?product_id=eq.' + p.product_id, { reorder_level:Math.max(0, +p.reorder || 0) }),
+  admin_set_rep_active:p => { if (p.rep_id === Auth.session.uid) throw new BizError(t('cant_deactivate_self')); return patchOne('sales_reps?id=eq.' + p.rep_id, { is_active:!!p.active }); },
+  admin_set_target:p => rest('POST', 'rep_targets?on_conflict=rep_id,month_start', { rep_id:p.rep_id, month_start:p.month + '-01', collection_target:p.collection_target, carton_target:p.carton_target || null }, { Prefer:'resolution=merge-duplicates,return=minimal' }).then(() => ({})),
+  async admin_upsert_product(p){
+    const row = { sku:p.sku, brand:p.brand, product_name:p.name, viscosity_grade:p.grade, oil_type:p.type || 'other', unit_size_liters:p.liters ? +p.liters : null, units_per_carton:p.upc, price_per_carton:p.price, is_active:p.active !== false };
+    if (p.id) return patchOne('products?id=eq.' + p.id, row);
+    const made = await rest('POST', 'products', row, { Prefer:'return=representation' });
+    await rest('POST', 'warehouse_inventory', { product_id:made[0].id, qty_on_hand:0, reorder_level:0 }, { Prefer:'return=minimal' });
+    return { id:made[0].id };
+  }
+};
+async function api(uid, name, payload){
+  if (!Auth.session || Auth.session.uid !== uid) throw new AuthExpired('wrong account');
+  const op = OPS[name]; if (!op) throw new BizError('unknown operation ' + name);
+  return op(payload || {});
+}
+async function readSnap(uid){ if (!Auth.session || Auth.session.uid !== uid) throw new AuthExpired('wrong account'); return Remote.refresh(); }
+
+// local mirror of the caller's (already RLS-filtered) data, so the existing screens can read it synchronously
+const Remote = {
+  snap:null,
+  async refresh(){ this.snap = await rpc('get_snapshot', {}); Server.db = this.snap; return this.snap; }
+};
+const Server = {
+  db:{ users:[], wh:[], invoices:[], open:[] },
+  user(id){ const u = (this.db.users || []).find(x => x.id === id); if (u) return u; if (Dev.uid === id && Dev.st && Dev.st.cache && Dev.st.cache.me) return Dev.st.cache.me; return null; },
+  role(uid){ const u = this.user(uid); return u && u.active ? u.role : null; },
+  snapshot(){ return Remote.snap; },
+  whRow(pid){ return (this.db.wh || []).find(w => w.product_id === pid); },
+  outstanding(cid){ return r2((this.db.invoices || []).filter(i => i.customer_id === cid && i.status === 'posted').reduce((s, i) => s + i.balance_due, 0) + (this.db.open || []).filter(o => o.customer_id === cid).reduce((s, o) => s + o.balance_due, 0)); },
+  views:VIEWS
+};
+
+// ===================== rep device: local storage, outbox, sync worker =====================
+const BACKOFF = [5, 15, 60, 300];
+const Dev = {
+  uid:null, st:null, syncing:false, timer:null, onChange:()=>{},
+  load(uid){
+    this.uid = uid;
+    this.st = store.get('oilrep.dev.' + uid) || { outbox:[], cache:null, inv:{}, draft:null, gps:'at_shop', pos:{ lat:24.7136, lng:46.6753 }, lastSync:null };
+  },
+  save(){ store.set('oilrep.dev.' + this.uid, this.st); },
+  pending(){ return this.st.outbox.filter(o => o.status === 'pending' || o.status === 'sending').length; },
+  failed(){ return this.st.outbox.filter(o => o.status === 'failed'); },
+  syncState(){ return this.failed().length ? 'bad' : this.pending() ? 'warn' : 'ok'; },
+  enqueue(op, client_uuid, payload){
+    this.st.outbox.push({ id:uuid(), op_type:op, rpc:op, client_uuid, payload, status:'pending', attempts:0, last_error:null, created_at:Date.now(), nextTryAt:0 });
+    this.save(); setTimeout(() => this.sync(false), 50);
+  },
+  start(){ this.stop(); this.timer = setInterval(() => this.sync(false), 4000); },   // spec: every 60 s; shortened so the demo is lively
+  stop(){ if (this.timer) clearInterval(this.timer); this.timer = null; },
+
+  async refresh(){
+    if (Net.blocked() || this.pending() > 0 || this.failed().length) return false;     // spec: refresh only after the outbox drains
+    try {
+      const s = await readSnap(this.uid);
+      this.st.cache = { at:Date.now(), me:s.me, regions:s.regions, products:s.products, customers:s.customers, van:s.van, transfers:s.transfers,
+        invoices:s.invoices, colls:s.colls, open:s.open, targets:s.targets, visits:s.visits };
+      // local records that the server now owns can go
+      Object.keys(this.st.inv).forEach(k => { if (this.st.inv[k].status === 'synced') delete this.st.inv[k]; });
+      this.st.outbox = this.st.outbox.filter(o => o.status !== 'synced' || Date.now() - o.created_at < 600000);
+      this.save(); return true;
+    } catch(e){ return false; }
+  },
+
+  async sync(manual){
+    if (this.syncing || Net.blocked()) return;
+    const now = Date.now();
+    const rows = this.st.outbox.filter(o => (o.status === 'pending' && (manual || o.nextTryAt <= now)) || (manual && o.status === 'failed'));
+    if (!rows.length) { if (this.st.cache === null || !this.st.cache.at || (this.pending() === 0 && !this.failed().length && now - (this.st.cache.at||0) > 30000)) { await this.refresh(); this.onChange(); } return; }
+    this.syncing = true; this.onChange();
+    try {
+      for (const o of rows.sort((a,b) => a.created_at - b.created_at)) {
+        o.status = 'sending'; this.save();
+        try {
+          const res = await api(this.uid, o.rpc, o.payload);
+          o.status = 'synced'; o.result = res; o.last_error = null; this.applySynced(o, res);
+        } catch(e) {
+          if (e instanceof NetError) { o.status = 'pending'; o.attempts++; o.nextTryAt = Date.now() + BACKOFF[Math.min(o.attempts-1, 3)]*1000; this.save(); break; }
+          o.status = 'failed'; o.last_error = e.message; this.markFailed(o); this.save(); break;   // business error: stop and alert
+        }
+        this.save(); this.onChange();
+      }
+      this.st.lastSync = Date.now();
+    } finally { this.syncing = false; this.save(); }
+    if (this.pending() === 0 && !this.failed().length) await this.refresh();
+    this.onChange();
+  },
+  applySynced(o, res){
+    if (o.op_type === 'submit_invoice') {
+      const l = this.st.inv[o.client_uuid]; if (l) Object.assign(l, { status:'synced', number:res.invoice_number, total:res.total, balance_due:res.balance_due, flags:res.flags, invoice_id:res.invoice_id });
+    }
+  },
+  markFailed(o){ const l = this.st.inv[o.client_uuid]; if (l) l.status = 'failed'; },
+  retry(id){ const o = this.st.outbox.find(x => x.id === id); if (o) { o.status = 'pending'; o.nextTryAt = 0; this.save(); this.sync(true); } },
+  discard(id){
+    const o = this.st.outbox.find(x => x.id === id); if (!o) return;
+    this.st.outbox = this.st.outbox.filter(x => x.id !== id); delete this.st.inv[o.client_uuid]; this.save();
+    this.refresh().then(() => this.onChange());
+  },
+
+  // ---------- cache accessors (always work offline)
+  c(){ return this.st.cache || { products:[], customers:[], van:[], transfers:[], invoices:[], colls:[], open:[], targets:[], visits:[], regions:[] }; },
+  vanQty(pid){ const v = this.c().van.find(x => x.product_id === pid); return v ? v.qty : 0; },
+  product(pid){ return this.c().products.find(p => p.id === pid); },
+  customer(cid){ return this.c().customers.find(c => c.id === cid); },
+  estimate(items){
+    let sub = 0, vat = 0;
+    Object.entries(items).forEach(([pid, q]) => { const p = this.product(+pid); if (p && q > 0) { sub += q * p.price; vat += r2(q * p.price * p.vat / 100); } });
+    return { subtotal:r2(sub), vat:r2(vat), total:r2(sub + vat) };
+  },
+  allInvoices(){
+    const c = this.c(), srv = c.invoices.map(i => ({ ...i, _state:'synced' }));
+    const seen = new Set(srv.map(i => i.client_uuid));
+    const loc = Object.values(this.st.inv).filter(l => !seen.has(l.client_uuid)).map(l => ({
+      id:null, client_uuid:l.client_uuid, invoice_number:l.number, customer_id:l.customer_id, shop_name_snapshot:l.shop, payment_type:l.payment_type,
+      total:l.total || l.est_total, paid_at_sale:l.paid, amount_paid:l.paid, balance_due:l.balance_due != null ? l.balance_due : r2((l.est_total||0) - l.paid), due_date:l.due,
+      synced_at:new Date(l.created_at).toISOString(), device_created_at:new Date(l.created_at).toISOString(), status:'posted', flags:l.flags||[],
+      items:Object.entries(l.items).map(([p,q]) => ({ product_id:+p, qty:q, unit_price:(this.product(+p)||{}).price||0, line_total:r2(q*((this.product(+p)||{}).price||0)) })),
+      _state: l.status === 'failed' ? 'failed' : (l.status === 'synced' ? 'synced' : 'pending'), _err:(this.st.outbox.find(o => o.client_uuid === l.client_uuid)||{}).last_error }));
+    return [...loc, ...srv].sort((a,b) => new Date(b.device_created_at) - new Date(a.device_created_at));
+  },
+  // credit documents the rep can collect against, with pending local collections already applied
+  openItems(cid){
+    const c = this.c(), applied = {};
+    this.st.outbox.filter(o => o.op_type === 'record_collection' && o.status !== 'synced').forEach(o => {
+      const k = o.payload.invoice_id ? 'i' + o.payload.invoice_id : 'o' + o.payload.opening_receivable_id; applied[k] = (applied[k]||0) + o.payload.amount; });
+    const out = [];
+    c.invoices.filter(i => i.customer_id === cid && i.status === 'posted' && i.balance_due > 0).forEach(i => out.push({ kind:'invoice', id:i.id, label:i.invoice_number, due:i.due_date, balance:r2(i.balance_due - (applied['i'+i.id]||0)) }));
+    c.open.filter(o => o.customer_id === cid && o.balance_due > 0).forEach(o => out.push({ kind:'opening', id:o.id, label:o.note || 'Opening balance', due:o.due_date, balance:r2(o.balance_due - (applied['o'+o.id]||0)) }));
+    return out.filter(x => x.balance > 0).sort((a,b) => String(a.due).localeCompare(String(b.due)));
+  },
+  outstanding(cid){ return r2(this.openItems(cid).reduce((s,x) => s + x.balance, 0)); },
+  pseudoSnap(){
+    const c = this.c(), me = c.me || { id:this.uid, full_name:'' };
+    const pend = this.allInvoices().filter(i => i._state !== 'synced').map(i => ({ ...i, rep_id:this.uid }));
+    const pendColl = this.st.outbox.filter(o => o.op_type === 'record_collection' && o.status !== 'synced').map(o => ({ rep_id:this.uid, amount:o.payload.amount, method:o.payload.method, collected_at:o.payload.collected_at }));
+    return { targets:c.targets, users:[me], invoices:[...c.invoices.filter(i => i.rep_id === this.uid), ...pend], colls:[...c.colls, ...pendColl] };
+  },
+
+  // ---------- simulated GPS (the sandbox cannot give real coordinates)
+  gps(cust){
+    const m = this.st.gps; if (m === 'denied') return { denied:true };
+    const base = cust && cust.loc ? cust.loc : this.st.pos, j = () => (Math.random() - .5) * 0.00018;
+    if (m === 'near') return { lat:base.lat + 0.0008, lng:base.lng, acc:20 };
+    if (m === 'far') return { lat:base.lat + 0.08, lng:base.lng + 0.03, acc:15 };
+    if (m === 'poor') return { lat:base.lat + j(), lng:base.lng + j(), acc:180 };
+    if (m === 'mock') return { lat:base.lat + j(), lng:base.lng + j(), acc:8, mock:true };
+    return { lat:base.lat + j(), lng:base.lng + j(), acc:12 };
+  }
+};
+
+// ===================== real GPS (replaces the demo simulator) =====================
+const RealGPS = {
+  pos:null, denied:false, on:false,
+  start(){
+    if (this.on) return; this.on = true;
+    if (!navigator.geolocation) { this.denied = true; return; }
+    navigator.geolocation.watchPosition(
+      p => { this.pos = { lat:p.coords.latitude, lng:p.coords.longitude, acc:p.coords.accuracy, at:Date.now() }; this.denied = false; },
+      e => { if (e.code === 1) this.denied = true; },
+      { enableHighAccuracy:true, maximumAge:10000, timeout:30000 });
+  }
+};
+// Browsers cannot detect mock-location apps; that flag only comes from a native build.
+Dev.gps = function(){
+  RealGPS.start();
+  if (RealGPS.denied) return { denied:true };
+  if (!RealGPS.pos || Date.now() - RealGPS.pos.at > 180000) return { denied:true, nofix:true };
+  return { lat:RealGPS.pos.lat, lng:RealGPS.pos.lng, acc:RealGPS.pos.acc };
+};
+
+// [English, Arabic]. Arabic is the default UI language (RTL).
+const L = {
+customers:['Customers','العملاء'], app_name:['Oil Rep System','نظام مندوبي الزيوت'], app_rep:['Rep app','تطبيق المندوب'], app_admin:['Admin console','لوحة الإدارة'], app_version:['App version','إصدار التطبيق'],
+login_tag:['Field sales, van stock and collections in one place.','المبيعات الميدانية ومخزون السيارات والتحصيل في مكان واحد.'],
+demo_note:['Demo accounts, no password. Data stays in this browser.','حسابات تجريبية بدون كلمة مرور. البيانات محفوظة في هذا المتصفح فقط.'],
+account_inactive:['Account inactive','الحساب غير مفعّل'], contact_admin:['Your account is switched off. Contact the admin.','تم إيقاف حسابك. تواصل مع المدير.'],
+sar:['SAR','ر.س'], of:['of','من'], new:['New','جديد'], save:['Save','حفظ'], saved:['Saved','تم الحفظ'], cancel:['Cancel','إلغاء'], close:['Close','إغلاق'], back:['Back','رجوع'],
+edit:['Edit','تعديل'], discard:['Discard','تجاهل'], details:['Details','التفاصيل'], note:['Note','ملاحظة'], notes:['Notes','ملاحظات'], reason:['Reason (required)','السبب (مطلوب)'],
+nothing_here:['Nothing here.','لا يوجد شيء هنا.'], nothing_owed:['No shop owes anything.','لا توجد مبالغ مستحقة على أي محل.'], all_good:['All above reorder level.','كل الأصناف فوق حد إعادة الطلب.'],
+active:['Active','نشط'], inactive:['Inactive','غير نشط'], status:['Status','الحالة'], pass:['OK','سليم'], check:['Check','يحتاج مراجعة'], days:['days','يوم'], low:['Low','منخفض'],
+// nav + rep home
+nav_home:['Home','الرئيسية'], nav_stock:['Stock','المخزون'], nav_invoices:['Invoices','الفواتير'], nav_customers:['Shops','المحلات'], nav_more:['More','المزيد'],
+today:['Today','اليوم'], hello:['Hello, {0}','أهلاً، {0}'], month_progress:['This month: collected vs target','هذا الشهر: المحصّل مقابل الهدف'],
+visits_today:['Visits today','زيارات اليوم'], cash_today:['Cash today','نقد اليوم'], cartons_month:['Cartons this month','كراتين هذا الشهر'],
+new_visit:['New visit','زيارة جديدة'], my_stock:['My stock','مخزون سيارتي'], request_stock:['Request stock','طلب بضاعة'], collect_payment:['Collect payment','تحصيل دفعة'],
+transfers:['Transfers','التحويلات'], my_performance:['My performance','أدائي'], collection_vs_target:['Collection vs target','التحصيل مقابل الهدف'],
+kpi_rule:['Counts cash at sale plus collections. Credit invoices alone do not count.','يشمل النقد وقت البيع والتحصيلات. الفواتير الآجلة وحدها لا تُحتسب.'],
+carton_target:['Carton target','هدف الكراتين'],
+// sync
+sync:['Sync','المزامنة'], sync_ok:['All synced','تمت مزامنة كل شيء'], sync_wait:['{0} items waiting to sync','{0} عناصر بانتظار المزامنة'], sync_bad:['{0} items need attention','{0} عناصر تحتاج مراجعة'],
+synced_short:['Synced','متزامن'], offline:['Offline','بدون اتصال'], sync_now:['Sync now','زامن الآن'], sync_done:['Sync finished','انتهت المزامنة'], pending_items:['Pending items','عناصر معلّقة'],
+last_sync:['Last sync','آخر مزامنة'], attempts:['Attempts','المحاولات'], retry:['Retry','إعادة المحاولة'], retrying:['Retrying…','جارٍ إعادة المحاولة…'],
+discard_confirm:['Discard this item? Its effect will be removed from this phone.','تجاهل هذا العنصر؟ سيُزال أثره من هذا الجهاز.'], no_connection:['No connection. Try again when online.','لا يوجد اتصال. حاول مرة أخرى عند توفر الإنترنت.'],
+first_login_online:['First login needs internet to download your data.','أول تسجيل دخول يحتاج إنترنت لتحميل بياناتك.'],
+ob_pending:['Waiting','بالانتظار'], ob_sending:['Sending','جارٍ الإرسال'], ob_synced:['Synced','تمت'], ob_failed:['Needs attention','تحتاج مراجعة'],
+op_submit_invoice:['Invoice','فاتورة'], op_request_transfer:['Stock request','طلب بضاعة'], op_receive_transfer:['Receive stock','استلام بضاعة'], op_record_collection:['Collection','تحصيل'], op_add_customer:['New shop','محل جديد'],
+// stock + transfers
+stock_cached:['Shown from the last sync. Updates as you sell.','يُعرض من آخر مزامنة ويتحدث مع كل عملية بيع.'], units_per_carton:['units per carton','وحدة في الكرتون'], on_van:['On van','في السيارة'],
+send_request:['Send request','إرسال الطلب'], request_saved:['Request saved. It will reach the warehouse when online.','تم حفظ الطلب وسيصل للمستودع عند توفر الاتصال.'],
+no_transfers:['No transfers yet.','لا توجد تحويلات بعد.'], tap_to_receive:['Tap to confirm delivery','اضغط لتأكيد الاستلام'], cancel_request:['Cancel request','إلغاء الطلب'],
+receive_transfer:['Receive transfer','استلام تحويل'], receive_hint:['Count the cartons you actually received. A difference marks the transfer as disputed.','عدّ الكراتين التي استلمتها فعلياً. أي فرق يجعل التحويل متنازعاً عليه.'],
+qty_sent:['Sent','المرسل'], qty_received:['Received','المستلم'], confirm_receipt:['Confirm receipt','تأكيد الاستلام'], mismatch_warn:['The quantity differs from what was sent. The warehouse will be notified.','الكمية تختلف عن المرسلة. سيتم إبلاغ المستودع.'],
+invalid_qty:['Enter whole numbers only.','أدخل أعداداً صحيحة فقط.'], received_ok:['Receipt saved','تم حفظ الاستلام'], received_disputed:['Saved. Marked as disputed.','تم الحفظ. التحويل متنازع عليه.'],
+st_Pending:['Pending','قيد الانتظار'], 'st_In-Transit':['In transit','في الطريق'], st_Received:['Received','تم الاستلام'], st_Disputed:['Disputed','متنازع عليه'], st_Cancelled:['Cancelled','ملغى'], st_PendingSync:['Waiting to sync','بانتظار المزامنة'],
+// customers + visit
+search_shop:['Search shops','ابحث عن محل'], all_regions:['All regions','كل المناطق'], no_shops:['No shops match.','لا توجد محلات مطابقة.'], start_visit:['Start visit','بدء زيارة'], owed:['Owed','المستحق'],
+add_shop:['Add shop','إضافة محل'], shop_name:['Shop name','اسم المحل'], owner:['Owner','المالك'], phone:['Phone','الجوال'], type:['Type','النوع'], region:['Region','المنطقة'],
+type_repair_shop:['Repair shop','ورشة'], type_gas_station:['Gas station','محطة وقود'], type_banshar:['Tyre shop','بنشر'], type_other:['Other','أخرى'],
+shop_saved:['Shop saved. You can invoice it after it syncs.','تم حفظ المحل. يمكنك الفوترة له بعد المزامنة.'], shop_pending_note:['Available after sync','متاح بعد المزامنة'],
+draft_exists:['Finish or discard your current draft first.','أكمل المسودة الحالية أو تجاهلها أولاً.'], add_lines:['Products','المنتجات'], carton:['carton','كرتون'], van_empty:['No stock on your van. Request stock first.','لا يوجد مخزون في سيارتك. اطلب بضاعة أولاً.'],
+over_van:['More than the {0} on your van. The server will flag a stock conflict.','أكثر من {0} الموجودة في سيارتك. سيسجل النظام تعارضاً في المخزون.'],
+credit_limit:['Credit limit','الحد الائتماني'], payment:['Payment','الدفع'], pay_cash:['Cash','نقداً'], pay_credit:['Credit','آجل'], pay_split:['Split','جزئي'], pay:['Payment','الدفع'],
+amount_paid_now:['Amount paid now','المبلغ المدفوع الآن'], due_date:['Due date','تاريخ الاستحقاق'], est_total:['Estimated total (incl. VAT)','الإجمالي التقديري (شامل الضريبة)'], review:['Review','مراجعة'],
+review_invoice:['Review invoice','مراجعة الفاتورة'], subtotal:['Subtotal','المجموع قبل الضريبة'], vat:['VAT','ضريبة القيمة المضافة'], total:['Total','الإجمالي'], paid_now:['Paid now','المدفوع الآن'], balance:['Balance due','المتبقي'],
+server_recalc:['Prices shown are indicative. The server recalculates the final total.','الأسعار المعروضة استرشادية، والخادم يعيد احتساب الإجمالي النهائي.'],
+credit_over_warn:['This sale will exceed the shop’s credit limit. It will be flagged for review.','هذا البيع يتجاوز الحد الائتماني للمحل وسيُرسل للمراجعة.'],
+err_split:['For split payment, enter an amount between 0 and the total.','في الدفع الجزئي أدخل مبلغاً أكبر من صفر وأقل من الإجمالي.'], err_due:['A due date is required for the unpaid balance.','تاريخ الاستحقاق مطلوب للمبلغ المتبقي.'],
+submit_invoice:['Submit invoice','إرسال الفاتورة'],
+gps_denied:['Location is off. Turn on precise location for this app to submit.','الموقع متوقف. فعّل الموقع الدقيق للتطبيق لتتمكن من الإرسال.'], gps_poor:['GPS accuracy is weak (±{0} m). You can still submit; it will be flagged.','دقة الموقع ضعيفة (±{0} م). يمكنك الإرسال وسيتم وضع علامة للمراجعة.'], gps_ok:['Location ±{0} m','الموقع ±{0} م'],
+// invoices
+invoices:['Invoices','الفواتير'], invoice:['Invoice','فاتورة'], no_invoices:['No invoices yet.','لا توجد فواتير بعد.'], number_after_sync:['Number assigned after sync','يُعطى الرقم بعد المزامنة'],
+inv_pending:['Pending sync','بانتظار المزامنة'], inv_synced:['Synced','متزامنة'], inv_failed:['Needs attention','تحتاج مراجعة'],
+saved_locally:['Saved on this phone. It will sync automatically.','تم الحفظ على هذا الجهاز وستتم مزامنته تلقائياً.'], share_whatsapp:['Share on WhatsApp','مشاركة عبر واتساب'], print_pdf:['Print / PDF','طباعة / PDF'],
+flag_gps_outside_geofence:['Far from shop','بعيد عن المحل'], flag_low_gps_accuracy:['Weak GPS','إشارة ضعيفة'], flag_credit_limit_exceeded:['Over credit limit','تجاوز الحد الائتماني'], flag_stock_conflict:['Stock conflict','تعارض مخزون'], flag_mock_location:['Mock location','موقع مزيّف'],
+// collections
+collect_hint:['Oldest first. Includes balances carried over from before go-live.','الأقدم أولاً. يشمل الأرصدة المرحّلة قبل بدء التشغيل.'], opening_balance:['Opening balance','رصيد افتتاحي'], overdue:['Overdue','متأخر'],
+amount:['Amount','المبلغ'], record_payment:['Record payment','تسجيل الدفعة'], err_amount:['Enter an amount above 0 and up to {0}.','أدخل مبلغاً أكبر من 0 وحتى {0}.'], payment_saved:['Payment saved','تم حفظ الدفعة'],
+m_cash:['Cash','نقداً'], m_bank_transfer:['Bank transfer','تحويل بنكي'], m_cheque:['Cheque','شيك'],
+// settings + demo
+settings:['Settings','الإعدادات'], language:['Language','اللغة'], logout:['Log out','تسجيل الخروج'], demo_controls:['Demo controls','أدوات العرض'], connection:['Connection','الاتصال'],
+airplane_on:['Turn on airplane mode','تشغيل وضع الطيران'], go_online:['Go back online','العودة للاتصال'], airplane_on_msg:['Airplane mode: nothing leaves the phone.','وضع الطيران: لا يخرج شيء من الجهاز.'], back_online:['Back online. Syncing…','عاد الاتصال. جارٍ المزامنة…'],
+lose_next:['Lose the next 2 server responses','إفقاد رد الخادم في آخر عمليتين'], lose_hint:['The server saves the data but the phone never hears back, like a dropped signal. The retry must not double-post.','الخادم يحفظ البيانات لكن الجهاز لا يستلم الرد كأن الإشارة انقطعت. إعادة المحاولة يجب ألا تكرر العملية.'], lose_set:['Next 2 responses will be lost','سيُفقد رد أول عمليتين'],
+gps_sim:['GPS simulator','محاكاة الموقع'], gps_hint:['Choose where the phone “is” when you start or submit a visit.','اختر مكان الجهاز عند بدء الزيارة أو إرسال الفاتورة.'],
+gpsm_at_shop:['At the shop','عند المحل'], gpsm_near:['Near the shop (~90 m)','قرب المحل (~90 م)'], gpsm_far:['Far away (~9 km)','بعيد (~9 كم)'], gpsm_poor:['Weak GPS signal','إشارة GPS ضعيفة'], gpsm_mock:['Mock location app','تطبيق موقع مزيّف'], gpsm_denied:['Location permission denied','إذن الموقع مرفوض'],
+switch_user:['Switch user','تبديل المستخدم'], reset_demo:['Reset demo data','إعادة ضبط البيانات'], reset_confirm:['Erase all demo data and start again?','مسح كل البيانات التجريبية والبدء من جديد؟'],
+// roles + admin nav
+role_rep:['Sales rep','مندوب مبيعات'], role_warehouse:['Warehouse','مستودع'], role_admin:['Admin','مدير'],
+adm_dash:['Dashboard','لوحة المتابعة'], adm_transfers:['Transfers','التحويلات'], adm_warehouse:['Warehouse stock','مخزون المستودع'], adm_vans:['Van stock','مخزون السيارات'], adm_invoices:['Invoices','الفواتير'],
+adm_flags:['Flags & exceptions','التنبيهات والاستثناءات'], adm_credit:['Credit & collections','الآجل والتحصيل'], adm_customers:['Customers','العملاء'], adm_products:['Products & prices','المنتجات والأسعار'], adm_reps:['Reps & targets','المندوبون والأهداف'],
+adm_ledger:['Stock ledger','سجل المخزون'], adm_checks:['Daily checks','الفحص اليومي'],
+cartons_today:['Cartons sold today','كراتين مباعة اليوم'], open_exceptions:['Open stock exceptions','استثناءات مخزون مفتوحة'], flagged_invoices:['Flagged invoices','فواتير عليها تنبيه'], pending_disputed:['Pending / disputed transfers','تحويلات معلّقة / متنازع عليها'],
+leaderboard:['Rep leaderboard this month','ترتيب المندوبين هذا الشهر'], low_stock:['Low stock','مخزون منخفض'],
+product:['Product','المنتج'], requested:['Requested','المطلوب'], in_warehouse:['In warehouse','في المستودع'], dispatch:['Dispatch','صرف'], dispatched:['Dispatched','تم الصرف'],
+resolve_dispute:['Close dispute','إغلاق النزاع'], resolve:['Resolve','حل'], resolution_note:['Resolution note (required)','ملاحظة الحل (مطلوبة)'], dispute_hint:['Post any stock correction first with “Adjust stock”.','سجّل أي تصحيح للمخزون أولاً عبر «تعديل المخزون».'],
+adjust_stock:['Adjust stock','تعديل المخزون'], delta_hint:['Use a negative number to remove cartons.','استخدم رقماً سالباً لإنقاص الكراتين.'], change:['Change','التغيير'], receive_supplier:['Receive from supplier','استلام من المورد'], cartons:['Cartons','كراتين'],
+sku:['SKU','رمز الصنف'], on_hand:['On hand','المتوفر'], reorder_level:['Reorder level','حد إعادة الطلب'], rep:['Rep','المندوب'], customer:['Customer','العميل'], flags:['Flags','التنبيهات'], when:['When','الوقت'],
+all_reps:['All reps','كل المندوبين'], all_payments:['All payment types','كل أنواع الدفع'], all_flags:['All flags','كل التنبيهات'], any_flag:['Any flag','أي تنبيه'], all_products:['All products','كل المنتجات'], all_locations:['All locations','كل المواقع'], all_types:['All types','كل الأنواع'],
+stock_exceptions:['Stock exceptions','استثناءات المخزون'], exceptions_hint:['A rep sold more than the system knew about. The sale is kept; reconcile with a physical check.','باع المندوب أكثر مما يعرفه النظام. البيع مسجّل، وتتم التسوية بجرد فعلي.'],
+no_open_exceptions:['No open exceptions.','لا توجد استثناءات مفتوحة.'], shortfall:['Shortfall','العجز'], exc_hint:['What did you find? For example: stock loaded without an app transfer.','ماذا وجدت؟ مثال: بضاعة حُمّلت بدون تحويل في التطبيق.'], distance:['Distance','المسافة'],
+total_outstanding:['Total outstanding','إجمالي المستحق'], opening_balances:['Opening balances','الأرصدة الافتتاحية'], import_opening:['Import opening balance','إدخال رصيد افتتاحي'], outstanding:['Outstanding','المستحق'],
+not_due:['Not due','غير مستحق'], over_limit:['Over limit','فوق الحد'], collections:['Latest collections','آخر التحصيلات'], method:['Method','الطريقة'],
+location:['Location','الموقع'], verified:['Set','محدد'], not_set:['Not set yet','لم يُحدد بعد'], limit_hint:['Reps cannot change this. 0 means cash only.','لا يستطيع المندوب تغييره. صفر يعني نقداً فقط.'],
+add_product:['Add product','إضافة منتج'], price_carton:['Price per carton (ex-VAT)','سعر الكرتون (بدون ضريبة)'], price_note:['Price changes apply to future invoices only.','تغيير السعر يسري على الفواتير القادمة فقط.'], brand:['Brand','العلامة'], viscosity:['Viscosity','اللزوجة'], liters:['Size (litres)','الحجم (لتر)'],
+set_target:['Set target','تحديد الهدف'], collection_target:['Collection target (SAR)','هدف التحصيل (ر.س)'], deactivate:['Deactivate','إيقاف'], activate:['Activate','تفعيل'],
+deactivate_confirm:['Deactivate this rep? They can no longer log in or sync.','إيقاف هذا المندوب؟ لن يستطيع الدخول أو المزامنة.'], activate_confirm:['Activate this rep?','تفعيل هذا المندوب؟'],
+ledger_hint:['Read-only audit trail. Every stock change is recorded here and can never be edited.','سجل مراجعة للقراءة فقط. كل حركة مخزون مسجلة هنا ولا يمكن تعديلها.'],
+warehouse:['Warehouse','المستودع'], van:['Van','السيارة'], balance_after:['Balance after','الرصيد بعد'], by:['By','بواسطة'], qty:['Qty','الكمية'], price:['Price','السعر'],
+mv_RECEIPT_FROM_SUPPLIER:['Supplier receipt','استلام من مورد'], mv_TRANSFER_OUT:['Transfer out','صرف تحويل'], mv_TRANSFER_IN:['Transfer in','استلام تحويل'], mv_SALE:['Sale','بيع'], mv_ADJUSTMENT:['Adjustment','تعديل'],
+submitted_at:['Submitted at','موقع الإرسال'], shop_location:['Shop location','موقع المحل'], accuracy:['Accuracy','الدقة'], no_flags:['No flags','لا توجد تنبيهات'],
+checks_hint:['The evening checks from the go-live runbook, in one screen.','فحوصات المساء من دليل التشغيل في شاشة واحدة.'],
+chk_ledger:['Stock ledger matches balances','سجل المخزون يطابق الأرصدة'], chk_ledger_ok:['Every van and warehouse balance equals the sum of its ledger rows.','كل رصيد سيارة ومستودع يساوي مجموع حركاته.'], ledger_total:['Ledger total','مجموع السجل'],
+chk_stuck:['No transfer stuck over 24 hours','لا تحويلات عالقة أكثر من 24 ساعة'], chk_exc:['Exceptions and flags','الاستثناءات والتنبيهات'], chk_cash:['Cash each rep should hand over today','النقد المتوقع من كل مندوب اليوم'],
+chk_cash_hint:['Cash at sale plus cash collections. Differences are investigated the same day.','نقد البيع مضافاً إليه التحصيل النقدي. تُراجع الفروقات في نفس اليوم.'], chk_visits:['Visits today (target 15, minimum 12)','زيارات اليوم (الهدف 15، الحد الأدنى 12)'],
+};
+
+Object.assign(L, {
+email:['Email','البريد الإلكتروني'], password:['Password','كلمة المرور'], sign_in:['Sign in','تسجيل الدخول'], bad_login:['Wrong email or password.','البريد الإلكتروني أو كلمة المرور غير صحيحة.'],
+session_expired:['Your session ended. Sign in again. Nothing on this phone was lost.','انتهت جلستك. سجّل الدخول من جديد، ولن يضيع أي شيء على هذا الجهاز.'],
+config_missing:['The app is not connected to a server yet. Edit config.js with your Supabase URL and key.','التطبيق غير مربوط بالخادم بعد. عدّل ملف config.js بعنوان Supabase والمفتاح.'],
+logout_pending:['Some items have not synced yet. Log out anyway? They will send when you sign back in.','هناك عناصر لم تُزامن بعد. تسجيل الخروج؟ سترسل عند دخولك مرة أخرى.'],
+settings_short:['Settings','الإعدادات'], gps_waiting:['Waiting for a GPS fix…','بانتظار تحديد الموقع…'], loading:['Loading…','جارٍ التحميل…'], version_label:['Version','الإصدار'],
+cant_deactivate_self:['You cannot deactivate yourself.','لا يمكنك إيقاف حسابك بنفسك.'], not_allowed:['Not allowed.','غير مسموح.']
+});
+
+// ===================== UI core =====================
+const App = { lang:'ar', uid:null, route:{ s:'login', p:{} }, hist:[], theme:null };
+const $ = s => document.querySelector(s);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+function t(k, ...a){
+  const e = L[k]; if (!e) { console.warn('missing i18n key', k); return k; }
+  let s = e[App.lang === 'ar' ? 1 : 0]; a.forEach((v, i) => { s = s.split('{' + i + '}').join(v); }); return s;
+}
+const money = n => '<span class="m"><span class="num">' + Number(n||0).toLocaleString('en-US', { minimumFractionDigits:2, maximumFractionDigits:2 }) + '</span> ' + t('sar') + '</span>';
+const money0 = n => '<span class="num">' + Number(n||0).toLocaleString('en-US', { maximumFractionDigits:0 }) + '</span>';
+const N = n => '<span class="num">' + esc(n) + '</span>';
+const fmtDT = iso => iso ? '<span class="num">' + new Date(iso).toLocaleString('en-GB', { timeZone:RYD, day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit', hour12:false }) + '</span>' : '–';
+const fmtD = s => s ? '<span class="num">' + esc(String(s).slice(0,10)) + '</span>' : '–';
+const pname = p => p ? `${p.brand} ${p.name} ${p.grade}${p.liters ? ' · ' + p.liters + 'L' : ''}` : '?';
+const chip = (cls, txt) => `<span class="chip ${cls}">${txt}</span>`;
+const IC = {
+  home:'<path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>', box:'<path d="M21 8l-9-5-9 5v8l9 5 9-5zM3 8l9 5 9-5M12 13v8"/>',
+  doc:'<path d="M6 2h9l5 5v15H6zM14 2v6h6M9 13h8M9 17h8"/>', users:'<circle cx="9" cy="8" r="4"/><path d="M2 21c0-4 3-7 7-7s7 3 7 7M17 4a4 4 0 0 1 0 8M22 21c0-3-2-5-4-6"/>',
+  more:'<circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/>', plus:'<path d="M12 5v14M5 12h14"/>',
+  truck:'<path d="M2 6h12v10H2zM14 9h4l4 4v3h-8zM6 19a2 2 0 1 0 .1 0M17 19a2 2 0 1 0 .1 0"/>', cash:'<rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/>',
+  pin:'<path d="M12 22s7-6.5 7-12a7 7 0 0 0-14 0c0 5.5 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/>', back:'<path d="M15 5l-7 7 7 7"/>', gear:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>'
+};
+const svg = (n, extra) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" ${extra||''}>${IC[n]}</svg>`;
+
+function toast(msg, bad){
+  const old = $('#toast'); if (old) old.remove();
+  const d = document.createElement('div'); d.id = 'toast'; d.className = 'toast' + (bad ? ' bad' : ''); d.setAttribute('role', 'status'); d.textContent = msg;
+  document.body.appendChild(d); setTimeout(() => d.remove(), 3200);
+}
+function go(s, p, opts){
+  if (!(opts && opts.noHist)) App.hist.push(App.route);
+  if (App.hist.length > 30) App.hist.shift();
+  App.route = { s, p:p || {} }; render(); window.scrollTo(0, 0);
+}
+function tab(s){ App.hist = []; App.route = { s, p:{} }; render(); window.scrollTo(0, 0); }
+function back(){ App.route = App.hist.pop() || { s:'home', p:{} }; render(); window.scrollTo(0, 0); }
+function persistApp(){ store.set('oilrep.app', { lang:App.lang, uid:App.uid, theme:App.theme }); }
+function applyLang(){ document.documentElement.lang = App.lang; document.documentElement.dir = App.lang === 'ar' ? 'rtl' : 'ltr'; document.title = t('app_name'); }
+
+// ---- modal + generic form
+function openModal(html){ closeModal(); const d = document.createElement('div'); d.className = 'scrim'; d.id = 'modal'; d.innerHTML = `<div class="modal" role="dialog" aria-modal="true">${html}</div>`; d.addEventListener('click', e => { if (e.target === d) closeModal(); }); document.body.appendChild(d); const f = d.querySelector('input,select,textarea'); if (f) f.focus(); }
+function closeModal(){ const m = $('#modal'); if (m) m.remove(); }
+let _formCb = null;
+function openForm(title, fields, onSubmit, submitLabel){
+  _formCb = onSubmit;
+  const fh = fields.map(f => {
+    const id = 'f_' + f.id, v = f.value == null ? '' : f.value;
+    let inp;
+    if (f.type === 'select') inp = `<select id="${id}">${f.options.map(o => `<option value="${esc(o[0])}" ${String(o[0]) === String(v) ? 'selected' : ''}>${esc(o[1])}</option>`).join('')}</select>`;
+    else if (f.type === 'textarea') inp = `<textarea id="${id}" rows="2">${esc(v)}</textarea>`;
+    else inp = `<input id="${id}" type="${f.type || 'text'}" value="${esc(v)}" ${f.min != null ? 'min="' + f.min + '"' : ''} ${f.step ? 'step="' + f.step + '"' : ''} inputmode="${f.type === 'number' ? 'decimal' : 'text'}">`;
+    return `<div class="field"><label for="${id}">${esc(f.label)}</label>${inp}${f.hint ? `<span class="small muted">${esc(f.hint)}</span>` : ''}</div>`;
+  }).join('');
+  openModal(`<h2>${esc(title)}</h2><div class="stack" style="margin-top:1rem">${fh}</div><div class="row" style="margin-top:1.2rem"><button class="btn grow" data-a="formSubmit">${esc(submitLabel || t('save'))}</button><button class="btn ghost" data-a="closeModal">${t('cancel')}</button></div>`);
+  _formFields = fields;
+}
+let _formFields = [];
+function formValues(){ const o = {}; _formFields.forEach(f => { const el = $('#f_' + f.id); o[f.id] = el ? el.value : ''; }); return o; }
+
+// ---- status chips
+const trChip = s => chip({ Pending:'warn', 'In-Transit':'', Received:'ok', Disputed:'bad', Cancelled:'grey', PendingSync:'warn' }[s] || 'grey', t('st_' + s));
+const invChip = st => st === 'synced' ? chip('ok', t('inv_synced')) : st === 'failed' ? chip('bad', t('inv_failed')) : chip('warn', t('inv_pending'));
+const flagChip = f => chip(f === 'credit_limit_exceeded' || f === 'stock_conflict' ? 'bad' : 'warn', t('flag_' + f));
+const typeLabel = x => t('type_' + x);
+const dueDefault = () => new Date(Date.now() + 30 * 864e5).toISOString().slice(0, 10);
+
+// ===================== Rep app views =====================
+function syncPill(){
+  const s = Dev.syncState(), n = s === 'bad' ? Dev.failed().length : Dev.pending();
+  const txt = Net.offline ? t('offline') : (s === 'ok' ? t('synced_short') : N(n));
+  return `<span id="syncpill" class="chip ${Net.offline ? 'grey' : s}" data-a="goSettings" style="cursor:pointer"><i class="dot"></i>${txt}</span>`;
+}
+function syncBanner(){
+  const s = Dev.syncState(), n = s === 'bad' ? Dev.failed().length : Dev.pending();
+  const txt = s === 'ok' ? t('sync_ok') : s === 'warn' ? t('sync_wait', n) : t('sync_bad', n);
+  return `<div id="syncbanner" class="banner ${s}" data-a="goSettings"><i class="dot"></i><span class="grow">${txt}${Net.offline ? ' — ' + t('offline') : ''}</span></div>`;
+}
+function dipstick(pct, collected, target){
+  const w = Math.max(0, Math.min(100, pct));
+  return `<div class="dip"><div class="row between" style="align-items:flex-end"><div class="dip-num">${money0(collected)}</div><div class="muted small">${t('of')} ${money0(target)} ${t('sar')}</div></div>
+  <div class="dip-rod" role="img" aria-label="${pct}%"><div class="dip-fill" style="width:${w}%"></div></div>
+  <div class="dip-scale"><span class="num">0</span><span class="num">${pct}%</span><span class="num">100%</span></div></div>`;
+}
+function kpiMine(){
+  const s = Dev.pseudoSnap(), month = todayKey().slice(0, 7);
+  return Server.views.kpi(s, month)[0] || { collected:0, target:100000, pct:0, cartons:0, carton_target:null };
+}
+const RepViews = {
+  home(){
+    const me = Dev.c().me || {}, k = kpiMine(), today = todayKey();
+    const vis = new Set([...Dev.c().visits.filter(v => dayKey(v.check_in_at) === today).map(v => v.client_uuid),
+      ...Object.values(Dev.st.inv).filter(l => dayKey(new Date(l.created_at).toISOString()) === today).map(l => l.visit_uuid)]).size;
+    const cash = Server.views.cashExpectedToday({ ...Dev.pseudoSnap(), users:[{ id:Dev.uid, role:'rep', active:true }] })[0];
+    return { title:t('today'), body:`
+      <div><h1>${t('hello', esc(me.full_name || ''))}</h1><div class="muted small">${new Date().toLocaleDateString(App.lang === 'ar' ? 'ar-SA-u-nu-latn' : 'en-GB', { timeZone:RYD, weekday:'long', day:'numeric', month:'long' })}</div></div>
+      ${syncBanner()}
+      <div class="card"><h3>${t('month_progress')}</h3>${dipstick(k.pct, k.collected, k.target)}</div>
+      <div class="row card"><div class="stat"><b>${N(vis)}<span class="muted small"> / 15</span></b><span>${t('visits_today')}</span></div>
+        <div class="stat"><b>${money0(cash ? cash.amount : 0)}</b><span>${t('cash_today')}</span></div>
+        <div class="stat"><b>${N(k.cartons)}</b><span>${t('cartons_month')}</span></div></div>
+      <div class="bigbtns">
+        <button class="bigbtn primary" data-a="newVisit">${svg('plus')}${t('new_visit')}</button>
+        <button class="bigbtn" data-a="go" data-s="stock">${svg('box')}${t('my_stock')}</button>
+        <button class="bigbtn" data-a="go" data-s="request">${svg('truck')}${t('request_stock')}</button>
+        <button class="bigbtn" data-a="go" data-s="collect">${svg('cash')}${t('collect_payment')}</button></div>
+      <div class="row wrap"><button class="btn ghost sm" data-a="go" data-s="transfers">${t('transfers')}</button><button class="btn ghost sm" data-a="go" data-s="perf">${t('my_performance')}</button></div>` };
+  },
+  stock(){
+    const prods = Dev.c().products.filter(p => p.active);
+    return { title:t('my_stock'), body:`<div class="note info">${t('stock_cached')}</div>
+      <div class="list">${prods.map(p => { const q = Dev.vanQty(p.id); return `<div class="card row"><div class="grow"><b>${esc(pname(p))}</b><div class="muted small">${esc(p.sku)} · ${N(p.upc)} ${t('units_per_carton')}</div></div>${q <= 5 ? chip(q === 0 ? 'bad' : 'warn', t('low')) : ''}<b style="font-size:1.4rem">${N(q)}</b></div>`; }).join('')}</div>
+      <button class="btn block" data-a="go" data-s="request">${t('request_stock')}</button>` };
+  },
+  request(){
+    const d = Dev.st.reqDraft || (Dev.st.reqDraft = {});
+    const prods = Dev.c().products.filter(p => p.active);
+    return { title:t('request_stock'), back:1, body:`<div class="list">${prods.map(p => `<div class="card row"><div class="grow"><b>${esc(pname(p))}</b><div class="muted small">${t('on_van')}: ${N(Dev.vanQty(p.id))}</div></div>
+      <div class="stepper"><button data-a="reqQty" data-pid="${p.id}" data-d="-1" aria-label="-">−</button><b>${N(d[p.id] || 0)}</b><button data-a="reqQty" data-pid="${p.id}" data-d="1" aria-label="+">+</button></div></div>`).join('')}</div>
+      <div class="field"><label for="reqnote">${t('notes')}</label><input id="reqnote"></div>
+      <button class="btn block" data-a="sendRequest" ${Object.values(d).some(q => q > 0) ? '' : 'disabled'}>${t('send_request')}</button>` };
+  },
+  transfers(){
+    const c = Dev.c(), pendingReq = Dev.st.outbox.filter(o => o.op_type === 'request_transfer' && o.status !== 'synced');
+    const rows = [...pendingReq.map(o => ({ pend:true, id:null, status:'PendingSync', requested_at:new Date(o.created_at).toISOString(), items:o.payload.items.map(i => ({ product_id:i.product_id, qty_requested:i.qty })) })),
+      ...[...c.transfers].sort((a, b) => b.id - a.id)];
+    return { title:t('transfers'), back:1, body: rows.length ? `<div class="list">${rows.map(r => `<div class="card ${r.status === 'In-Transit' ? 'tap' : ''}" ${r.status === 'In-Transit' ? `data-a="go" data-s="receive" data-id="${r.id}"` : ''}>
+      <div class="row between"><b>${r.id ? '#' + N(r.id) : t('new')}</b>${trChip(r.status)}</div>
+      <div class="muted small">${fmtDT(r.requested_at)}</div>
+      <div class="small" style="margin-top:.4rem">${r.items.map(i => `${esc(pname(Dev.product(i.product_id)))} × ${N(i.qty_sent != null ? i.qty_sent : i.qty_requested)}`).join('<br>')}</div>
+      ${r.status === 'In-Transit' ? `<div class="chip" style="margin-top:.5rem">${t('tap_to_receive')}</div>` : ''}
+      ${r.status === 'Pending' ? `<button class="btn ghost sm" style="margin-top:.5rem" data-a="cancelTransfer" data-id="${r.id}">${t('cancel_request')}</button>` : ''}</div>`).join('')}</div>` : `<div class="note info">${t('no_transfers')}</div>` };
+  },
+  receive(p){
+    const tr = Dev.c().transfers.find(x => x.id === +p.id); if (!tr) return { title:t('transfers'), back:1, body:'' };
+    return { title:t('receive_transfer') + ' #' + tr.id, back:1, body:`<div class="note info">${t('receive_hint')}</div>
+      <div class="list">${tr.items.map(i => `<div class="card"><b>${esc(pname(Dev.product(i.product_id)))}</b>
+        <div class="row between" style="margin-top:.5rem"><span class="muted">${t('qty_sent')}: ${N(i.qty_sent)}</span>
+        <input type="number" inputmode="numeric" min="0" style="width:110px" id="rc_${i.product_id}" value="${i.qty_sent}" data-oi="rcCheck" data-sent="${i.qty_sent}"></div></div>`).join('')}</div>
+      <div id="rcwarn"></div><button class="btn block" data-a="confirmReceive" data-id="${tr.id}">${t('confirm_receipt')}</button>` };
+  },
+  customers(){
+    return { title:t('customers'), body:`<div class="row"><input id="q" placeholder="${t('search_shop')}" data-oi="custSearch" class="grow"><button class="btn" data-a="addShop">${svg('plus')}</button></div>
+      <select id="regionf" data-oc="custSearch"><option value="">${t('all_regions')}</option>${Dev.c().regions.map(r => `<option value="${r.id}">${esc(App.lang === 'ar' ? r.name_ar : r.name_en)}</option>`).join('')}</select>
+      <div id="custlist" class="list">${custListHTML('', '', 'browse')}</div>` };
+  },
+  visit(p){
+    const d = Dev.st.draft;
+    if (!d) return { title:t('new_visit'), back:1, body:`<div class="row"><input id="q" placeholder="${t('search_shop')}" data-oi="custSearch" class="grow"></div><div id="custlist" class="list">${custListHTML('', '', 'visit')}</div>` };
+    const cust = Dev.customer(d.customer_id), prods = Dev.c().products.filter(x => x.active && (Dev.vanQty(x.id) > 0 || d.items[x.id]));
+    if (d.step === 'review') return RepViews.review();
+    const est = Dev.estimate(d.items), g = Dev.gps(cust);
+    const out = Dev.outstanding(d.customer_id);
+    return { title:esc(cust.shop_name), back:1, body:`
+      ${g.denied ? `<div class="note bad">${t('gps_denied')}</div>` : g.acc > 100 ? `<div class="note warn">${t('gps_poor', Math.round(g.acc))}</div>` : `<div class="chip ok">${svg('pin', 'width="14" height="14"')} ${t('gps_ok', Math.round(g.acc))}</div>`}
+      <div class="muted small">${t('credit_limit')}: ${money0(cust.credit_limit)} · ${t('owed')}: ${money0(out)}</div>
+      <h2>${t('add_lines')}</h2>
+      ${prods.length ? '' : `<div class="note warn">${t('van_empty')}</div>`}
+      <div class="list">${prods.map(x => { const q = d.items[x.id] || 0, van = Dev.vanQty(x.id);
+        return `<div class="card"><div class="row"><div class="grow"><b>${esc(pname(x))}</b><div class="muted small">${money(x.price)} / ${t('carton')} · ${t('on_van')} ${N(van)}</div></div>
+        <div class="stepper"><button data-a="qty" data-pid="${x.id}" data-d="-1" aria-label="-">−</button><b>${N(q)}</b><button data-a="qty" data-pid="${x.id}" data-d="1" aria-label="+">+</button></div></div>
+        ${q > van ? `<div class="note warn" style="margin-top:.5rem">${t('over_van', van)}</div>` : ''}</div>`; }).join('')}</div>
+      <h2>${t('payment')}</h2>
+      <div class="seg">${['cash', 'credit', 'split'].map(m => `<button class="${d.payment_type === m ? 'on' : ''}" data-a="payType" data-m="${m}">${t('pay_' + m)}</button>`).join('')}</div>
+      ${d.payment_type === 'split' ? `<div class="field"><label for="paid">${t('amount_paid_now')}</label><input id="paid" type="number" inputmode="decimal" value="${esc(d.amount_paid)}" data-oc="draftField" data-f="amount_paid"></div>` : ''}
+      ${d.payment_type !== 'cash' ? `<div class="field"><label for="due">${t('due_date')}</label><input id="due" type="date" value="${esc(d.due_date)}" data-oc="draftField" data-f="due_date"></div>` : ''}
+      <div class="card row between"><span class="muted">${t('est_total')}</span><b>${money(est.total)}</b></div>
+      <div class="row"><button class="btn block grow" data-a="toReview" ${est.total > 0 ? '' : 'disabled'}>${t('review')}</button><button class="btn ghost" data-a="discardDraft">${t('discard')}</button></div>` };
+  },
+  review(){
+    const d = Dev.st.draft, cust = Dev.customer(d.customer_id), est = Dev.estimate(d.items), g = Dev.gps(cust);
+    const paid = d.payment_type === 'cash' ? est.total : d.payment_type === 'credit' ? 0 : Number(d.amount_paid || 0);
+    const bal = r2(est.total - paid), out = Dev.outstanding(d.customer_id);
+    const problems = [];
+    if (d.payment_type === 'split' && !(paid > 0 && paid < est.total)) problems.push(t('err_split'));
+    if (bal > 0 && !d.due_date) problems.push(t('err_due'));
+    return { title:t('review_invoice'), back:1, body:`
+      <div class="card"><b>${esc(cust.shop_name)}</b>
+      <div class="list" style="margin-top:.6rem">${Object.entries(d.items).filter(([, q]) => q > 0).map(([pid, q]) => { const p = Dev.product(+pid); return `<div class="row between small"><span>${esc(pname(p))} × ${N(q)}</span><span>${money(q * p.price)}</span></div>`; }).join('')}</div>
+      <hr style="border:0;border-top:1px solid var(--line);margin:.8rem 0">
+      <div class="row between"><span class="muted">${t('subtotal')}</span>${money(est.subtotal)}</div>
+      <div class="row between"><span class="muted">${t('vat')} 15%</span>${money(est.vat)}</div>
+      <div class="row between"><b>${t('total')}</b><b>${money(est.total)}</b></div>
+      <div class="row between"><span class="muted">${t('paid_now')}</span>${money(paid)}</div>
+      <div class="row between"><span class="muted">${t('balance')}</span><b>${money(bal)}</b></div>
+      ${bal > 0 ? `<div class="row between"><span class="muted">${t('due_date')}</span>${fmtD(d.due_date)}</div>` : ''}</div>
+      <div class="note info">${t('server_recalc')}</div>
+      ${bal > 0 && out + bal > cust.credit_limit ? `<div class="note warn">${t('credit_over_warn')}</div>` : ''}
+      ${g.denied ? `<div class="note bad">${t('gps_denied')}</div>` : g.acc > 100 ? `<div class="note warn">${t('gps_poor', Math.round(g.acc))}</div>` : ''}
+      ${problems.map(x => `<div class="note bad">${x}</div>`).join('')}
+      <button class="btn block" data-a="submitInvoice" ${g.denied || problems.length ? 'disabled' : ''}>${t('submit_invoice')}</button>
+      <button class="btn ghost block" data-a="backToEdit">${t('edit')}</button>` };
+  },
+  invoices(){
+    const list = Dev.allInvoices();
+    return { title:t('invoices'), body: list.length ? `<div class="list">${list.map(i => `<div class="card tap" data-a="go" data-s="invoice" data-cu="${i.client_uuid}">
+      <div class="row between"><b>${esc(i.shop_name_snapshot)}</b>${invChip(i._state)}</div>
+      <div class="row between small muted"><span>${i.invoice_number ? esc(i.invoice_number) : t('number_after_sync')}</span><span>${fmtDT(i.device_created_at)}</span></div>
+      <div class="row between" style="margin-top:.3rem"><span class="chip grey">${t('pay_' + i.payment_type)}</span><b>${money(i.total)}</b></div></div>`).join('')}</div>` : `<div class="note info">${t('no_invoices')}</div>` };
+  },
+  invoice(p){
+    const i = Dev.allInvoices().find(x => x.client_uuid === p.cu); if (!i) return { title:t('invoices'), back:1, body:'' };
+    const sub = r2(i.items.reduce((s, x) => s + x.line_total, 0)), vat = r2(i.total - sub);
+    return { title:i.invoice_number || t('invoice'), back:1, body:`
+      ${p.fresh ? `<div class="note info">${t('saved_locally')}</div>` : ''}
+      <div class="card"><div class="row between"><b>${esc(i.shop_name_snapshot)}</b>${invChip(i._state)}</div>
+      <div class="muted small">${i.invoice_number ? esc(i.invoice_number) : t('number_after_sync')} · ${fmtDT(i.device_created_at)}</div>
+      ${i._state === 'failed' ? `<div class="note bad" style="margin-top:.6rem">${esc(i._err || '')}</div>` : ''}
+      <div class="list" style="margin:.8rem 0">${i.items.map(x => `<div class="row between small"><span>${esc(pname(Dev.product(x.product_id)))} × ${N(x.qty)}</span><span>${money(x.line_total)}</span></div>`).join('')}</div>
+      <div class="row between"><span class="muted">${t('subtotal')}</span>${money(sub)}</div><div class="row between"><span class="muted">${t('vat')}</span>${money(vat)}</div>
+      <div class="row between"><b>${t('total')}</b><b>${money(i.total)}</b></div>
+      <div class="row between"><span class="muted">${t('pay_' + i.payment_type)}</span>${money(i.amount_paid)}</div>
+      <div class="row between"><span class="muted">${t('balance')}</span><b>${money(i.balance_due)}</b></div>
+      ${i.balance_due > 0 ? `<div class="row between"><span class="muted">${t('due_date')}</span>${fmtD(i.due_date)}</div>` : ''}
+      ${(i.flags || []).length ? `<div class="row wrap" style="margin-top:.6rem">${i.flags.map(flagChip).join('')}</div>` : ''}</div>
+      <div class="row hide-print"><button class="btn grow" data-a="shareWA" data-cu="${i.client_uuid}">${t('share_whatsapp')}</button><button class="btn ghost" data-a="printInv">${t('print_pdf')}</button></div>
+      ${i.balance_due > 0 && i._state === 'synced' ? `<button class="btn ghost block hide-print" data-a="go" data-s="collect" data-cid="${i.customer_id}">${t('collect_payment')}</button>` : ''}` };
+  },
+  collect(p){
+    const c = Dev.c();
+    if (!p.cid) {
+      const custs = c.customers.filter(x => Dev.outstanding(x.id) > 0);
+      return { title:t('collect_payment'), back:1, body: custs.length ? `<div class="list">${custs.map(x => `<div class="card tap row between" data-a="go" data-s="collect" data-cid="${x.id}"><b>${esc(x.shop_name)}</b><b>${money(Dev.outstanding(x.id))}</b></div>`).join('')}</div>` : `<div class="note info">${t('nothing_owed')}</div>` };
+    }
+    const cust = Dev.customer(+p.cid), items = Dev.openItems(+p.cid);
+    return { title:esc(cust.shop_name), back:1, body:`<div class="note info">${t('collect_hint')}</div>
+      <div class="list">${items.map(x => { const k = x.kind + x.id; return `<div class="card"><div class="row between"><b>${x.kind === 'opening' ? t('opening_balance') : esc(x.label)}</b><b>${money(x.balance)}</b></div>
+      <div class="muted small">${t('due_date')}: ${fmtD(x.due)}${x.due && x.due < todayKey() ? ' ' + chip('bad', t('overdue')) : ''}</div>
+      <div class="grid2" style="margin-top:.6rem"><input type="number" inputmode="decimal" id="ca_${k}" placeholder="${t('amount')}" value="${x.balance}"><select id="cm_${k}"><option value="cash">${t('m_cash')}</option><option value="bank_transfer">${t('m_bank_transfer')}</option><option value="cheque">${t('m_cheque')}</option></select></div>
+      <button class="btn block" style="margin-top:.6rem" data-a="recordCollection" data-kind="${x.kind}" data-id="${x.id}" data-cid="${cust.id}" data-bal="${x.balance}">${t('record_payment')}</button></div>`; }).join('')}</div>` };
+  },
+  perf(){
+    const k = kpiMine();
+    return { title:t('my_performance'), back:1, body:`<div class="card"><h3>${t('collection_vs_target')}</h3>${dipstick(k.pct, k.collected, k.target)}</div>
+      <div class="note info">${t('kpi_rule')}</div>
+      <div class="row card"><div class="stat"><b>${N(k.cartons)}</b><span>${t('cartons_month')}</span></div><div class="stat"><b>${N(k.carton_target || '–')}</b><span>${t('carton_target')}</span></div></div>` };
+  },
+  settings(){
+    const ob = [...Dev.st.outbox].sort((a, b) => b.created_at - a.created_at).slice(0, 12);
+    return { title:t('settings'), body:`
+      <div class="card stack"><h3>${t('language')}</h3><div class="seg" style="grid-template-columns:1fr 1fr"><button class="${App.lang === 'ar' ? 'on' : ''}" data-a="lang" data-l="ar">العربية</button><button class="${App.lang === 'en' ? 'on' : ''}" data-a="lang" data-l="en">English</button></div></div>
+      <div class="card stack"><div class="row between"><h3>${t('sync')}</h3>${syncPill()}</div>
+        <div class="muted small">${t('pending_items')}: ${N(Dev.pending())} · ${t('last_sync')}: ${Dev.st.lastSync ? fmtDT(new Date(Dev.st.lastSync).toISOString()) : '–'}</div>
+        <button class="btn block" data-a="syncNow">${t('sync_now')}</button>
+        ${ob.length ? `<div class="list">${ob.map(o => `<div class="card" style="padding:.7rem"><div class="row between"><b class="small">${t('op_' + o.op_type)}</b>${chip({ pending:'warn', sending:'warn', synced:'ok', failed:'bad' }[o.status], t('ob_' + o.status))}</div>
+          <div class="muted small">${t('attempts')}: ${N(o.attempts)} · ${fmtDT(new Date(o.created_at).toISOString())}</div>
+          ${o.last_error ? `<div class="note bad" style="margin-top:.4rem">${esc(o.last_error)}</div>` : ''}
+          ${o.status === 'failed' ? `<div class="row" style="margin-top:.5rem"><button class="btn sm" data-a="retryOb" data-id="${o.id}">${t('retry')}</button><button class="btn ghost sm" data-a="discardOb" data-id="${o.id}">${t('discard')}</button></div>` : ''}</div>`).join('')}</div>` : ''}</div>
+      <div class="card row between"><span class="muted">${t('app_version')}</span><b class="num">1.0.0</b></div>
+      <button class="btn ghost block" data-a="logout">${t('logout')}</button>` };
+  }
+};
+function repShell(){
+  const r = App.route, v = (RepViews[r.s] || RepViews.home)(r.p);
+  const tabs = [['home', 'home', t('nav_home')], ['stock', 'box', t('nav_stock')], ['invoices', 'doc', t('nav_invoices')], ['customers', 'users', t('nav_customers')], ['settings', 'more', t('nav_more')]];
+  const on = { home:'home', stock:'stock', request:'stock', invoices:'invoices', invoice:'invoices', customers:'customers', settings:'settings' }[r.s];
+  return `<div class="rep"><div class="top">${v.back ? `<button class="btn ghost sm" data-a="back" aria-label="${t('back')}"><span class="flip" style="display:inline-flex;width:18px">${svg('back')}</span></button>` : ''}<h1>${v.title}</h1>${syncPill()}<button class="btn ghost sm" data-a="demo" aria-label="${t('demo_controls')}" style="width:40px">${svg('gear')}</button></div>
+  <div class="pad stack">${v.body}</div>
+  <nav class="nav" aria-label="main">${tabs.map(x => `<button class="${on === x[0] ? 'on' : ''}" data-a="tab" data-s="${x[0]}">${svg(x[1])}${x[2]}</button>`).join('')}</nav></div>`;
+}
+function custListHTML(q, region, mode){
+  q = (q || '').trim().toLowerCase();
+  const list = Dev.c().customers.filter(c => c.active && (!q || c.shop_name.toLowerCase().includes(q)) && (!region || String(c.region_id) === String(region)));
+  if (!list.length) return `<div class="note info">${t('no_shops')}</div>`;
+  const regName = id => { const r = Dev.c().regions.find(x => x.id === id); return r ? (App.lang === 'ar' ? r.name_ar : r.name_en) : ''; };
+  return list.map(c => { const pend = c._pending, out = Dev.outstanding(c.id);
+    return `<div class="card ${mode === 'visit' && !pend ? 'tap' : ''}" ${mode === 'visit' && !pend ? `data-a="pickCustomer" data-id="${c.id}"` : ''}>
+    <div class="row between"><b>${esc(c.shop_name)}</b>${pend ? chip('warn', t('inv_pending')) : chip('grey', typeLabel(c.type))}</div>
+    <div class="muted small">${esc(regName(c.region_id))}${c.phone ? ' · <span class="num">' + esc(c.phone) + '</span>' : ''}${out > 0 ? ' · ' + t('owed') + ' ' + money0(out) : ''}</div>
+    ${mode === 'browse' && !pend ? `<div class="row" style="margin-top:.5rem"><button class="btn sm" data-a="pickCustomer" data-id="${c.id}">${t('start_visit')}</button>${out > 0 ? `<button class="btn ghost sm" data-a="go" data-s="collect" data-cid="${c.id}">${t('collect_payment')}</button>` : ''}</div>` : ''}
+    ${pend && mode === 'visit' ? `<div class="small muted">${t('shop_pending_note')}</div>` : ''}</div>`; }).join('');
+}
+
+// ===================== Admin console views =====================
+App.f = { inv:{ rep:'', pay:'', flag:'' }, ledger:{ prod:'', loc:'', type:'' } };
+const AS = () => Server.snapshot(App.uid);
+const repName = (s, id) => (s.users.find(u => u.id === id) || {}).full_name || '–';
+const prodOf = (s, id) => s.products.find(p => p.id === id);
+const custOf = (s, id) => s.customers.find(c => c.id === id);
+const regName = (s, id) => { const r = s.regions.find(x => x.id === id); return r ? (App.lang === 'ar' ? r.name_ar : r.name_en) : '–'; };
+const tbl = (head, rows, empty) => rows.length ? `<div class="tablewrap"><table><thead><tr>${head.map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table></div>` : `<div class="note info">${empty || t('nothing_here')}</div>`;
+const sumItems = i => i.items.reduce((a, x) => a + x.qty, 0);
+
+const AdmViews = {
+  dash(s){
+    const today = todayKey(), month = today.slice(0, 7);
+    const invT = s.invoices.filter(i => i.status === 'posted' && dayKey(i.synced_at) === today);
+    const cash = Server.views.cashExpectedToday(s).reduce((a, x) => a + x.amount, 0);
+    const kpi = Server.views.kpi(s, month).sort((a, b) => b.collected - a.collected);
+    const low = Server.views.lowStock(s), flagged = s.invoices.filter(i => i.flags.length).length, exc = s.exc.filter(e => !e.resolved).length;
+    const pend = s.transfers.filter(x => x.status === 'Pending').length, disp = s.transfers.filter(x => x.status === 'Disputed').length;
+    return `<div class="kpis">
+      <div class="card kpi"><b>${N(invT.reduce((a, i) => a + sumItems(i), 0))}</b><span>${t('cartons_today')}</span></div>
+      <div class="card kpi"><b>${money0(cash)}</b><span>${t('cash_today')}</span></div>
+      <div class="card kpi tap" data-a="admGo" data-s="flags"><b>${N(exc)}</b><span>${t('open_exceptions')}</span></div>
+      <div class="card kpi tap" data-a="admGo" data-s="flags"><b>${N(flagged)}</b><span>${t('flagged_invoices')}</span></div>
+      <div class="card kpi tap" data-a="admGo" data-s="transfers"><b>${N(pend)}${disp ? ' / <span style="color:var(--red)">' + N(disp) + '</span>' : ''}</b><span>${t('pending_disputed')}</span></div></div>
+      <div class="card"><h2>${t('leaderboard')}</h2><div class="list" style="margin-top:.8rem">${kpi.map(k => `<div><div class="row between small"><b>${esc(k.name)}</b><span>${money0(k.collected)} / ${money0(k.target)} · <span class="num">${k.pct}%</span></span></div><div class="bar"><i style="width:${Math.min(100, k.pct)}%"></i></div></div>`).join('')}</div><div class="muted small" style="margin-top:.6rem">${t('kpi_rule')}</div></div>
+      <div class="card"><h2>${t('low_stock')}</h2><div style="margin-top:.6rem">${low.length ? low.map(l => `<div class="row between small"><span>${esc(pname(l.product))}</span><span>${chip('bad', N(l.qty) + ' ≤ ' + N(l.reorder))}</span></div>`).join('') : `<span class="muted">${t('all_good')}</span>`}</div></div>`;
+  },
+  transfers(s){
+    const sec = (st, title, limit) => {
+      const list = s.transfers.filter(x => x.status === st).sort((a, b) => b.id - a.id).slice(0, limit || 50);
+      return `<h2>${title} ${chip('grey', N(list.length))}</h2>` + (list.length ? `<div class="list">${list.map(x => `<div class="card"><div class="row between wrap"><b>#${N(x.id)} · ${esc(repName(s, x.rep_id))}</b><span class="muted small">${fmtDT(x.requested_at)}</span></div>
+        ${x.notes ? `<div class="small muted" style="margin-top:.3rem">${esc(x.notes)}</div>` : ''}
+        <div class="tablewrap" style="margin-top:.6rem"><table><thead><tr><th>${t('product')}</th><th>${t('requested')}</th><th>${t('in_warehouse')}</th>${st !== 'Pending' ? `<th>${t('qty_sent')}</th>` : ''}${st === 'Disputed' || st === 'Received' ? `<th>${t('qty_received')}</th>` : ''}</tr></thead><tbody>
+        ${x.items.map(i => { const w = s.wh.find(y => y.product_id === i.product_id), short = w && st === 'Pending' && w.qty < i.qty_requested;
+          return `<tr><td>${esc(pname(prodOf(s, i.product_id)))}</td><td>${N(i.qty_requested)}</td><td>${short ? chip('bad', N(w.qty)) : N(w ? w.qty : 0)}</td>${st !== 'Pending' ? `<td>${N(i.qty_sent)}</td>` : ''}${st === 'Disputed' || st === 'Received' ? `<td>${i.qty_received !== i.qty_sent ? chip('bad', N(i.qty_received)) : N(i.qty_received)}</td>` : ''}</tr>`; }).join('')}</tbody></table></div>
+        ${st === 'Pending' ? `<div class="row" style="margin-top:.6rem"><button class="btn" data-a="dispatch" data-id="${x.id}">${t('dispatch')}</button><button class="btn ghost" data-a="cancelT" data-id="${x.id}">${t('cancel_request')}</button></div>` : ''}
+        ${st === 'Disputed' ? `<div class="row wrap" style="margin-top:.6rem"><button class="btn" data-a="resolveDispute" data-id="${x.id}">${t('resolve_dispute')}</button><button class="btn ghost" data-a="adjustVan">${t('adjust_stock')}</button></div>` : ''}</div>`).join('')}</div>` : `<div class="muted small">${t('nothing_here')}</div>`);
+    };
+    return sec('Pending', t('st_Pending')) + sec('In-Transit', t('st_In-Transit')) + sec('Disputed', t('st_Disputed')) + sec('Received', t('st_Received'), 5);
+  },
+  warehouse(s){
+    return `<div class="row wrap"><button class="btn" data-a="supplierRecv">${t('receive_supplier')}</button><button class="btn ghost" data-a="adjustWh">${t('adjust_stock')}</button></div>` +
+      tbl([t('product'), t('sku'), t('on_hand'), t('reorder_level'), ''], s.wh.map(w => { const p = prodOf(s, w.product_id);
+        return [esc(pname(p)), `<span class="num">${esc(p.sku)}</span>`, `<b>${N(w.qty)}</b> ${w.qty <= w.reorder ? chip('bad', t('low')) : ''}`, N(w.reorder), `<button class="btn ghost sm" data-a="setReorder" data-id="${w.product_id}">${t('edit')}</button>`]; }));
+  },
+  vans(s){
+    const reps = s.users.filter(u => u.role === 'rep'), prods = s.products.filter(p => p.active);
+    return `<div class="row wrap"><button class="btn ghost" data-a="adjustVan">${t('adjust_stock')}</button></div>` +
+      `<div class="tablewrap"><table><thead><tr><th>${t('product')}</th>${reps.map(r => `<th>${esc(r.full_name)}</th>`).join('')}</tr></thead><tbody>${prods.map(p => `<tr><td>${esc(pname(p))}</td>${reps.map(r => { const v = s.van.find(x => x.rep_id === r.id && x.product_id === p.id); const q = v ? v.qty : 0; return `<td>${q === 0 ? '<span class="muted">0</span>' : '<b>' + N(q) + '</b>'}</td>`; }).join('')}</tr>`).join('')}</tbody></table></div>`;
+  },
+  invoices(s){
+    const f = App.f.inv;
+    const list = s.invoices.filter(i => (!f.rep || i.rep_id === f.rep) && (!f.pay || i.payment_type === f.pay) && (!f.flag || (f.flag === 'any' ? i.flags.length : i.flags.includes(f.flag)))).sort((a, b) => new Date(b.synced_at) - new Date(a.synced_at));
+    const sel = (key, opts) => `<select data-oc="admFilter" data-g="inv" data-k="${key}" style="width:auto">${opts.map(o => `<option value="${o[0]}" ${f[key] === o[0] ? 'selected' : ''}>${esc(o[1])}</option>`).join('')}</select>`;
+    return `<div class="row wrap">${sel('rep', [['', t('all_reps')], ...s.users.filter(u => u.role === 'rep').map(u => [u.id, u.full_name])])}${sel('pay', [['', t('all_payments')], ['cash', t('pay_cash')], ['credit', t('pay_credit')], ['split', t('pay_split')]])}
+      ${sel('flag', [['', t('all_flags')], ['any', t('any_flag')], ...['gps_outside_geofence', 'low_gps_accuracy', 'credit_limit_exceeded', 'stock_conflict', 'mock_location'].map(x => [x, t('flag_' + x)])])}</div>` +
+      tbl([t('invoice'), t('rep'), t('customer'), t('pay'), t('total'), t('balance'), t('flags'), t('when')], list.map(i => [`<a href="#" data-a="invDetail" data-id="${i.id}"><span class="num">${esc(i.invoice_number)}</span></a>`, esc(repName(s, i.rep_id)), esc(i.shop_name_snapshot), t('pay_' + i.payment_type), money(i.total), money(i.balance_due), i.flags.map(flagChip).join(' '), fmtDT(i.synced_at)]));
+  },
+  flags(s){
+    const exc = s.exc.filter(e => !e.resolved), fl = s.invoices.filter(i => i.flags.length).sort((a, b) => new Date(b.synced_at) - new Date(a.synced_at));
+    return `<h2>${t('stock_exceptions')} ${chip(exc.length ? 'bad' : 'ok', N(exc.length))}</h2><div class="muted small">${t('exceptions_hint')}</div>` +
+      tbl([t('rep'), t('product'), t('shortfall'), t('invoice'), t('when'), ''], exc.map(e => [esc(repName(s, e.rep_id)), esc(pname(prodOf(s, e.product_id))), `<b>${N(e.shortfall)}</b>`, `<span class="num">${esc((s.invoices.find(i => i.id === e.invoice_id) || {}).invoice_number)}</span>`, fmtDT(e.created_at), `<button class="btn sm" data-a="resolveExc" data-id="${e.id}">${t('resolve')}</button>`]), t('no_open_exceptions')) +
+      `<h2>${t('flagged_invoices')}</h2>` + tbl([t('invoice'), t('rep'), t('customer'), t('flags'), t('distance'), ''], fl.map(i => [`<span class="num">${esc(i.invoice_number)}</span>`, esc(repName(s, i.rep_id)), esc(i.shop_name_snapshot), i.flags.map(flagChip).join(' '), N(Math.round(i.distance_from_shop_m || 0)) + ' m', `<button class="btn ghost sm" data-a="invDetail" data-id="${i.id}">${t('details')}</button>`]), t('nothing_here'));
+  },
+  credit(s){
+    const today = todayKey(), rows = [];
+    const docs = [...s.invoices.filter(i => i.status === 'posted' && i.balance_due > 0).map(i => ({ cid:i.customer_id, due:i.due_date, bal:i.balance_due })), ...s.open.filter(o => o.balance_due > 0).map(o => ({ cid:o.customer_id, due:o.due_date, bal:o.balance_due }))];
+    const age = d => { if (!d || d >= today) return 0; const days = Math.floor((new Date(today) - new Date(d)) / 864e5); return days <= 30 ? 1 : days <= 60 ? 2 : 3; };
+    const by = {}; docs.forEach(d => { const b = by[d.cid] || (by[d.cid] = [0, 0, 0, 0]); b[age(d.due)] += d.bal; });
+    Object.entries(by).forEach(([cid, b]) => { const c = custOf(s, +cid), tot = r2(b.reduce((x, y) => x + y, 0)); rows.push([esc(c.shop_name), money0(c.credit_limit), `<b>${money0(tot)}</b>${tot > c.credit_limit ? ' ' + chip('bad', t('over_limit')) : ''}`, money0(b[0]), money0(b[1]), money0(b[2]), b[3] ? `<b style="color:var(--red)">${money0(b[3])}</b>` : '0']); });
+    const tot = docs.reduce((a, d) => a + d.bal, 0), opn = s.open.reduce((a, o) => a + o.balance_due, 0);
+    return `<div class="kpis"><div class="card kpi"><b>${money0(tot)}</b><span>${t('total_outstanding')}</span></div><div class="card kpi"><b>${money0(opn)}</b><span>${t('opening_balances')}</span></div></div>
+      <div class="row wrap"><button class="btn" data-a="importOpen">${t('import_opening')}</button></div>` +
+      tbl([t('customer'), t('credit_limit'), t('outstanding'), t('not_due'), '1–30 ' + t('days'), '31–60 ' + t('days'), '60+ ' + t('days')], rows, t('nothing_owed')) +
+      `<h2>${t('collections')}</h2>` + tbl([t('rep'), t('customer'), t('amount'), t('method'), t('when')], [...s.colls].sort((a, b) => new Date(b.collected_at) - new Date(a.collected_at)).slice(0, 25).map(c => [esc(repName(s, c.rep_id)), esc(custOf(s, c.customer_id).shop_name), money(c.amount), t('m_' + c.method), fmtDT(c.collected_at)]));
+  },
+  customers(s){
+    return `<div class="row wrap"><button class="btn" data-a="newCustomer">${t('add_shop')}</button></div>` + tbl([t('customer'), t('type'), t('region'), t('location'), t('credit_limit'), t('outstanding'), ''], s.customers.map(c => [`<b>${esc(c.shop_name)}</b>${c.active ? '' : ' ' + chip('grey', t('inactive'))}`, typeLabel(c.type), esc(regName(s, c.region_id)), c.loc ? chip('ok', t('verified')) : chip('warn', t('not_set')), money0(c.credit_limit), money0(Server.outstanding(c.id)), `<button class="btn ghost sm" data-a="editCustomer" data-id="${c.id}">${t('edit')}</button>`]));
+  },
+  products(s){
+    return `<div class="row wrap"><button class="btn" data-a="editProduct" data-id="">${t('add_product')}</button></div><div class="note info">${t('price_note')}</div>` +
+      tbl([t('sku'), t('product'), t('units_per_carton'), t('price_carton'), t('status'), ''], s.products.map(p => [`<span class="num">${esc(p.sku)}</span>`, esc(pname(p)), N(p.upc), money(p.price), p.active ? chip('ok', t('active')) : chip('grey', t('inactive')), `<button class="btn ghost sm" data-a="editProduct" data-id="${p.id}">${t('edit')}</button>`]));
+  },
+  reps(s){
+    const month = todayKey().slice(0, 7);
+    return tbl([t('rep'), t('phone'), t('region'), t('status'), t('collection_target'), t('carton_target'), ''], s.users.filter(u => u.role === 'rep').map(u => { const tg = s.targets.find(x => x.rep_id === u.id && x.month === month) || {};
+      return [`<b>${esc(u.full_name)}</b>`, `<span class="num">${esc(u.phone)}</span>`, esc(regName(s, u.region_id)), u.active ? chip('ok', t('active')) : chip('bad', t('inactive')), money0(tg.collection_target || 0), N(tg.carton_target || '–'),
+        `<button class="btn ghost sm" data-a="setTarget" data-id="${u.id}">${t('set_target')}</button> <button class="btn ${u.active ? 'danger' : ''} sm" data-a="toggleRep" data-id="${u.id}">${u.active ? t('deactivate') : t('activate')}</button>`]; }));
+  },
+  ledger(s){
+    const f = App.f.ledger;
+    const list = [...s.moves].reverse().filter(m => (!f.prod || m.product_id === +f.prod) && (!f.loc || m.location === f.loc) && (!f.type || m.type === f.type)).slice(0, 150);
+    const sel = (key, opts) => `<select data-oc="admFilter" data-g="ledger" data-k="${key}" style="width:auto">${opts.map(o => `<option value="${o[0]}" ${f[key] === o[0] ? 'selected' : ''}>${esc(o[1])}</option>`).join('')}</select>`;
+    return `<div class="note info">${t('ledger_hint')}</div><div class="row wrap">${sel('prod', [['', t('all_products')], ...s.products.map(p => [p.id, pname(p)])])}${sel('loc', [['', t('all_locations')], ['warehouse', t('warehouse')], ['van', t('van')]])}
+      ${sel('type', [['', t('all_types')], ...['RECEIPT_FROM_SUPPLIER', 'TRANSFER_OUT', 'TRANSFER_IN', 'SALE', 'ADJUSTMENT'].map(x => [x, t('mv_' + x)])])}</div>` +
+      tbl([t('when'), t('product'), t('location'), t('type'), t('change'), t('balance_after'), t('by'), t('note')], list.map(m => [fmtDT(m.created_at), esc(pname(prodOf(s, m.product_id))), m.location === 'van' ? esc(repName(s, m.rep_id)) : t('warehouse'), t('mv_' + m.type), `<b style="color:var(${m.delta > 0 ? '--green' : '--red'})">${m.delta > 0 ? '+' : ''}${N(m.delta)}</b>`, N(m.balance_after), esc(repName(s, m.created_by)), esc(m.note || '')]));
+  },
+  checks(s){
+    const bad = Server.views.reconcile(s), cash = Server.views.cashExpectedToday(s), today = todayKey();
+    const stuck = s.transfers.filter(x => ['Pending', 'In-Transit', 'Disputed'].includes(x.status) && Date.now() - new Date(x.requested_at) > 864e5);
+    const excOpen = s.exc.filter(e => !e.resolved).length, flagsToday = s.invoices.filter(i => i.flags.length && Date.now() - new Date(i.synced_at) < 864e5).length;
+    const visits = s.users.filter(u => u.role === 'rep' && u.active).map(u => ({ u, n:s.visits.filter(v => v.rep_id === u.id && dayKey(v.check_in_at) === today).length }));
+    const ok = b => b ? chip('ok', t('pass')) : chip('bad', t('check'));
+    return `<div class="note info">${t('checks_hint')}</div>
+      <div class="card"><div class="row between"><h2>${t('chk_ledger')}</h2>${ok(!bad.length)}</div>${bad.length ? tbl([t('location'), t('product'), t('on_hand'), t('ledger_total')], bad.map(b => [t(b.location === 'van' ? 'van' : 'warehouse') + (b.rep_id ? ' · ' + esc(repName(s, b.rep_id)) : ''), esc(pname(prodOf(s, b.product_id))), N(b.balance), N(b.ledger)])) : `<div class="muted small">${t('chk_ledger_ok')}</div>`}</div>
+      <div class="card"><div class="row between"><h2>${t('chk_stuck')}</h2>${ok(!stuck.length)}</div><div class="muted small">${stuck.length ? stuck.map(x => '#' + x.id + ' ' + esc(repName(s, x.rep_id)) + ' (' + t('st_' + x.status) + ')').join(', ') : t('nothing_here')}</div></div>
+      <div class="card"><div class="row between"><h2>${t('chk_exc')}</h2>${ok(!excOpen)}</div><div class="muted small">${N(excOpen)} ${t('open_exceptions')} · ${N(flagsToday)} ${t('flagged_invoices')} (24h)</div></div>
+      <div class="card"><h2>${t('chk_cash')}</h2><div class="list" style="margin-top:.6rem">${cash.map(c => `<div class="row between"><span>${esc(c.rep.full_name)}</span><b>${money(c.amount)}</b></div>`).join('')}</div><div class="muted small" style="margin-top:.5rem">${t('chk_cash_hint')}</div></div>
+      <div class="card"><h2>${t('chk_visits')}</h2><div class="list" style="margin-top:.6rem">${visits.map(v => `<div class="row between"><span>${esc(v.u.full_name)}</span>${chip(v.n >= 12 ? 'ok' : 'warn', N(v.n) + ' / 15')}</div>`).join('')}</div></div>`;
+  }
+};
+function adminShell(){
+  const me = Server.user(App.uid), role = me.role, s = AS();
+  const items = role === 'admin' ? ['dash', 'transfers', 'warehouse', 'vans', 'invoices', 'flags', 'credit', 'customers', 'products', 'reps', 'ledger', 'checks'] : ['transfers', 'warehouse', 'checks'];
+  let cur = App.route.s; if (!items.includes(cur)) cur = items[0];
+  const body = AdmViews[cur](s);
+  return `<div class="adm"><aside class="side"><h2>${t('app_name')}</h2>${items.map(i => `<button class="${i === cur ? 'on' : ''}" data-a="admGo" data-s="${i}">${t('adm_' + i)}</button>`).join('')}
+    <div style="margin-top:1rem;padding:.4rem .6rem" class="muted small">${esc(me.full_name)}<br>${chip('grey', t('role_' + role))}</div>
+    <button data-a="demo" style="margin-top:.4rem">${t('demo_controls')}</button></aside>
+    <main class="main stack"><div class="row between"><h1>${t('adm_' + cur)}</h1>${Net.offline ? chip('grey', t('offline')) : ''}</div>${body}</main></div>`;
+}
+
+// ===================== screens: login, inactive, demo panel =====================
+function loginView(){
+  const roleOrder = { rep:0, warehouse:1, admin:2 };
+  return `<div class="login stack"><div class="row between"><h1>${t('app_name')}</h1><button class="btn ghost sm" data-a="lang" data-l="${App.lang === 'ar' ? 'en' : 'ar'}">${App.lang === 'ar' ? 'English' : 'العربية'}</button></div>
+    <div class="muted">${t('login_tag')}</div><div class="note info">${t('demo_note')}</div>
+    <div class="list">${Server.db.users.map(u => `<button class="who" data-a="loginAs" data-id="${u.id}"><span class="avatar">${esc(u.full_name.slice(0, 1))}</span><span class="grow"><b>${esc(u.full_name)}</b><br><span class="muted small">${t('role_' + u.role)}${u.active ? '' : ' · ' + t('inactive')}</span></span>${u.role === 'rep' ? chip('', t('app_rep')) : chip('grey', t('app_admin'))}</button>`).join('')}</div></div>`;
+}
+function inactiveView(){ return `<div class="login stack"><h1>${t('account_inactive')}</h1><div class="note bad">${t('contact_admin')}</div><button class="btn block" data-a="logout">${t('logout')}</button></div>`; }
+function demoPanel(){
+  const me = Server.user(App.uid), isRep = me && me.role === 'rep';
+  openModal(`<div class="row between"><h2>${t('demo_controls')}</h2><button class="btn ghost sm" data-a="closeModal">${t('close')}</button></div>
+  <div class="stack" style="margin-top:1rem">
+    <div class="card stack"><h3>${t('connection')}</h3>
+      <button class="btn ${Net.offline ? '' : 'ghost'} block" data-a="toggleOffline">${Net.offline ? t('go_online') : t('airplane_on')}</button>
+      <button class="btn ghost block" data-a="loseNext">${t('lose_next')}</button><div class="muted small">${t('lose_hint')}${Net.loseNext ? ' <b>(' + Net.loseNext + ')</b>' : ''}</div></div>
+    ${isRep ? `<div class="card stack"><h3>${t('gps_sim')}</h3><select id="gpsmode" data-oc="setGps">${['at_shop', 'near', 'far', 'poor', 'mock', 'denied'].map(m => `<option value="${m}" ${Dev.st.gps === m ? 'selected' : ''}>${t('gpsm_' + m)}</option>`).join('')}</select><div class="muted small">${t('gps_hint')}</div></div>` : ''}
+    <div class="card stack"><h3>${t('switch_user')}</h3><div class="grid2">${Server.db.users.map(u => `<button class="btn ghost sm" data-a="loginAs" data-id="${u.id}">${esc(u.full_name)}</button>`).join('')}</div></div>
+    <div class="row"><button class="btn ghost grow" data-a="lang" data-l="${App.lang === 'ar' ? 'en' : 'ar'}">${App.lang === 'ar' ? 'English' : 'العربية'}</button><button class="btn danger grow" data-a="resetDemo">${t('reset_demo')}</button></div></div>`);
+}
+
+// ===================== render =====================
+function render(){
+  const root = $('#root'); applyLang();
+  if (!App.uid || (typeof Auth !== 'undefined' && Auth.expired)) { root.innerHTML = (typeof loginViewRemote === 'function' ? loginViewRemote : loginView)(); return; }
+  const me = Server.user(App.uid);
+  if (!me || !me.active) { root.innerHTML = inactiveView(); return; }
+  root.innerHTML = me.role === 'rep' ? repShell() : adminShell();
+}
+function softRender(){
+  if (!App.uid) return; const me = Server.user(App.uid); if (!me) return;
+  const busy = $('#modal') || (document.activeElement && ['INPUT', 'SELECT', 'TEXTAREA'].includes(document.activeElement.tagName));
+  const passive = ['home', 'stock', 'invoices', 'settings', 'transfers', 'invoice'];
+  if (me.role === 'rep' && passive.includes(App.route.s) && !busy) { const y = window.scrollY; render(); window.scrollTo(0, y); return; }
+  document.querySelectorAll('#syncpill').forEach(el => { el.outerHTML = syncPill(); });
+  const b = $('#syncbanner'); if (b) b.outerHTML = syncBanner();
+}
+
+// ===================== actions =====================
+async function admCall(name, payload, msg){
+  try { await api(App.uid, name, payload); if (typeof Remote !== 'undefined') await Remote.refresh(); toast(msg || t('saved')); closeModal(); render(); }
+  catch(e){ toast(e instanceof NetError ? t('no_connection') : e.message, true); }
+}
+function afterLogin(){ persistApp(); Dev.onChange = softRender; if (Server.user(App.uid).role === 'rep') Dev.start(); else Dev.stop(); }
+const Act = {
+  // --- common
+  closeModal, lang(el){ App.lang = el.dataset.l; persistApp(); closeModal(); render(); },
+  formSubmit(){ if (_formCb) _formCb(formValues()); },
+  demo(){ (typeof demoPanelRemote === 'function' ? demoPanelRemote : demoPanel)(); },
+  toggleOffline(){ Net.offline = !Net.offline; closeModal(); render(); toast(Net.offline ? t('airplane_on_msg') : t('back_online')); if (!Net.offline && Dev.uid) Dev.sync(true); },
+  loseNext(){ Net.loseNext = 2; closeModal(); toast(t('lose_set')); },
+  resetDemo(){ if (!confirm(t('reset_confirm'))) return; Object.keys(localStorage).filter(k => k.startsWith('oilrep.dev.')).forEach(k => store.del(k)); Server.reset(); App.uid = null; Dev.stop(); closeModal(); persistApp(); render(); },
+  async loginAs(el){
+    const id = el.dataset.id, u = Server.user(id); closeModal(); App.hist = [];
+    if (!u.active) { App.uid = id; persistApp(); render(); return; }
+    if (u.role === 'rep') {
+      Dev.load(id);
+      if (!Dev.st.cache) { if (Net.offline) { toast(t('first_login_online'), true); return; } await Dev.refresh(); }
+      else Dev.refresh();
+    } else Dev.uid = null;
+    App.uid = id; App.route = { s:u.role === 'rep' ? 'home' : (u.role === 'admin' ? 'dash' : 'transfers'), p:{} }; afterLogin(); render(); window.scrollTo(0, 0);
+  },
+  logout(){ closeModal(); if (typeof Auth !== 'undefined') { if (Dev.uid && Dev.pending() && !confirm(t('logout_pending'))) return; Auth.logout(); Server.db = { users:[] }; } App.uid = null; Dev.stop(); Dev.uid = null; persistApp(); render(); },
+  setGps(el){ Dev.st.gps = el.value; Dev.save(); toast(t('gpsm_' + el.value)); },
+  // --- navigation
+  go(el){ go(el.dataset.s, { id:el.dataset.id, cid:el.dataset.cid, cu:el.dataset.cu }); },
+  tab(el){ tab(el.dataset.s); }, back, goSettings(){ go('settings'); },
+  admGo(el){ App.route = { s:el.dataset.s, p:{} }; render(); window.scrollTo(0, 0); if (typeof Remote !== 'undefined') Remote.refresh().then(render).catch(() => {}); },
+  // --- sync
+  syncNow(){ if (Net.blocked()) { toast(t('offline'), true); return; } Dev.sync(true).then(() => { render(); toast(t('sync_done')); }); },
+  retryOb(el){ Dev.retry(el.dataset.id); toast(t('retrying')); },
+  discardOb(el){ if (confirm(t('discard_confirm'))) { Dev.discard(el.dataset.id); render(); } },
+  // --- rep: stock
+  reqQty(el){ const d = Dev.st.reqDraft || (Dev.st.reqDraft = {}), pid = el.dataset.pid; d[pid] = Math.max(0, (d[pid] || 0) + Number(el.dataset.d)); render(); },
+  sendRequest(){
+    const d = Dev.st.reqDraft || {}, items = Object.entries(d).filter(([, q]) => q > 0).map(([pid, q]) => ({ product_id:+pid, qty:q }));
+    if (!items.length) return; const cu = uuid(); const note = ($('#reqnote') || {}).value || '';
+    Dev.enqueue('request_transfer', cu, { client_uuid:cu, items, notes:note || null }); Dev.st.reqDraft = {}; Dev.save(); toast(t('request_saved')); go('transfers', {}, { noHist:true });
+  },
+  async cancelTransfer(el){ try { await api(Dev.uid, 'cancel_transfer', { transfer_id:+el.dataset.id }); await Dev.refresh(); render(); toast(t('saved')); } catch(e){ toast(e instanceof NetError ? t('no_connection') : e.message, true); } },
+  rcCheck(el){
+    const warn = Object.values(document.querySelectorAll('[data-oi="rcCheck"]')).some(i => Number(i.value) !== Number(i.dataset.sent));
+    $('#rcwarn').innerHTML = warn ? `<div class="note warn">${t('mismatch_warn')}</div>` : '';
+  },
+  confirmReceive(el){
+    const id = +el.dataset.id, tr = Dev.c().transfers.find(x => x.id === id), received = []; let disputed = false;
+    for (const i of tr.items) { const q = Number(($('#rc_' + i.product_id) || {}).value); if (!(q >= 0) || !Number.isInteger(q)) { toast(t('invalid_qty'), true); return; } received.push({ product_id:i.product_id, qty_received:q }); if (q !== i.qty_sent) disputed = true; }
+    tr.items.forEach((i, k) => { i.qty_received = received[k].qty_received; const v = Dev.c().van.find(x => x.product_id === i.product_id); if (v) v.qty += i.qty_received; else Dev.c().van.push({ rep_id:Dev.uid, product_id:i.product_id, qty:i.qty_received }); });
+    tr.status = disputed ? 'Disputed' : 'Received';
+    Dev.enqueue('receive_transfer', uuid(), { transfer_id:id, received }); toast(t(disputed ? 'received_disputed' : 'received_ok')); go('transfers', {}, { noHist:true });
+  },
+  // --- rep: customers
+  custSearch(){ const q = ($('#q') || {}).value, r = ($('#regionf') || {}).value; const mode = App.route.s === 'visit' ? 'visit' : 'browse'; $('#custlist').innerHTML = custListHTML(q, r, mode); },
+  addShop(){
+    const regs = Dev.c().regions.map(r => [r.id, App.lang === 'ar' ? r.name_ar : r.name_en]);
+    openForm(t('add_shop'), [{ id:'name', label:t('shop_name') }, { id:'owner', label:t('owner') }, { id:'phone', label:t('phone'), type:'tel' },
+      { id:'type', label:t('type'), type:'select', options:['repair_shop', 'gas_station', 'banshar', 'other'].map(x => [x, typeLabel(x)]) },
+      { id:'region', label:t('region'), type:'select', options:regs, value:(Dev.c().me || {}).region_id }], v => {
+      if (!v.name.trim()) { toast(t('shop_name') + ' ?', true); return; }
+      const g = Dev.gps(null); if (g.denied) { toast(t('gps_denied'), true); return; }
+      const cu = uuid(), p = { client_uuid:cu, shop_name:v.name.trim(), owner_name:v.owner || null, phone:v.phone || null, shop_type:v.type, region_id:+v.region, lat:g.lat, lng:g.lng };
+      Dev.c().customers.push({ id:'tmp-' + cu, shop_name:p.shop_name, owner:p.owner_name, phone:p.phone, type:p.shop_type, region_id:p.region_id, loc:{ lat:g.lat, lng:g.lng }, credit_limit:0, active:true, _pending:true });
+      Dev.enqueue('add_customer', cu, p); closeModal(); render(); toast(t('shop_saved'));
+    }, t('add_shop'));
+  },
+  // --- rep: visit + invoice
+  newVisit(){ go('visit'); },
+  async pickCustomer(el){
+    const cid = +el.dataset.id, d = Dev.st.draft;
+    if (d && d.customer_id !== cid && Object.values(d.items).some(q => q > 0)) { toast(t('draft_exists'), true); go('visit'); return; }
+    if (!d || d.customer_id !== cid) {
+      let g = Dev.gps(Dev.customer(cid));
+      if (g.nofix) { toast(t('gps_waiting')); for (let i = 0; i < 20 && g.nofix; i++) { await sleep(500); g = Dev.gps(Dev.customer(cid)); } }   // a real phone needs a moment for its first fix
+      if (g.denied) { toast(g.nofix ? t('gps_waiting') : t('gps_denied'), true); return; }
+      Dev.st.draft = { client_uuid:uuid(), visit_uuid:uuid(), customer_id:cid, check_in_at:new Date().toISOString(), items:{}, payment_type:'cash', amount_paid:'', due_date:dueDefault(), step:'edit' };
+      Dev.save();
+    }
+    go('visit', {}, { noHist:App.route.s === 'visit' });
+  },
+  qty(el){ const d = Dev.st.draft, pid = el.dataset.pid; d.items[pid] = Math.max(0, (d.items[pid] || 0) + Number(el.dataset.d)); Dev.save(); const y = window.scrollY; render(); window.scrollTo(0, y); },
+  payType(el){ Dev.st.draft.payment_type = el.dataset.m; Dev.save(); const y = window.scrollY; render(); window.scrollTo(0, y); },
+  draftField(el){ Dev.st.draft[el.dataset.f] = el.value; Dev.save(); },
+  toReview(){ Dev.st.draft.step = 'review'; Dev.save(); render(); window.scrollTo(0, 0); },
+  backToEdit(){ Dev.st.draft.step = 'edit'; Dev.save(); render(); },
+  discardDraft(){ Dev.st.draft = null; Dev.save(); back(); },
+  submitInvoice(){
+    const d = Dev.st.draft; if (!d || Dev.st.inv[d.client_uuid]) return;         // double-tap guard (server is idempotent too)
+    const cust = Dev.customer(d.customer_id), g = Dev.gps(cust); if (g.denied) { toast(g.nofix ? t('gps_waiting') : t('gps_denied'), true); return; }
+    const est = Dev.estimate(d.items), items = Object.entries(d.items).filter(([, q]) => q > 0).map(([pid, q]) => ({ product_id:+pid, qty:q }));
+    const paid = d.payment_type === 'cash' ? est.total : d.payment_type === 'credit' ? 0 : Number(d.amount_paid || 0);
+    const payload = { client_uuid:d.client_uuid, visit_client_uuid:d.visit_uuid, customer_id:d.customer_id, payment_type:d.payment_type, amount_paid:paid,
+      due_date:d.payment_type === 'cash' ? null : d.due_date, device_created_at:new Date().toISOString(), check_in_at:d.check_in_at,
+      lat:g.lat, lng:g.lng, gps_accuracy_m:g.acc, mock_location:g.mock || undefined, items };
+    Dev.st.inv[d.client_uuid] = { client_uuid:d.client_uuid, visit_uuid:d.visit_uuid, number:null, status:'pending', customer_id:d.customer_id, shop:cust.shop_name, items:{ ...d.items },
+      est_total:est.total, payment_type:d.payment_type, paid, due:payload.due_date, created_at:Date.now(), flags:[] };
+    items.forEach(i => { const v = Dev.c().van.find(x => x.product_id === i.product_id); if (v) v.qty = Math.max(0, v.qty - i.qty); });   // local van deduction
+    Dev.st.draft = null; Dev.enqueue('submit_invoice', d.client_uuid, payload);
+    App.hist = []; go('invoice', { cu:d.client_uuid, fresh:true }, { noHist:true });
+  },
+  shareWA(el){
+    const i = Dev.allInvoices().find(x => x.client_uuid === el.dataset.cu); if (!i) return;
+    const lines = i.items.map(x => `• ${pname(Dev.product(x.product_id))} × ${x.qty} = ${money(x.line_total).replace(/<[^>]+>/g, '')}`).join('\n');
+    const txt = `${t('app_name')}\n${i.invoice_number || ''}\n${i.shop_name_snapshot}\n\n${lines}\n\n${t('total')}: ${Number(i.total).toFixed(2)} ${t('sar')}\n${t('balance')}: ${Number(i.balance_due).toFixed(2)} ${t('sar')}`;
+    window.open('https://wa.me/?text=' + encodeURIComponent(txt), '_blank');
+  },
+  printInv(){ window.print(); },
+  recordCollection(el){
+    const k = el.dataset.kind + el.dataset.id, amt = r2(Number(($('#ca_' + k) || {}).value)), bal = Number(el.dataset.bal), method = ($('#cm_' + k) || {}).value;
+    if (!(amt > 0) || amt > bal) { toast(t('err_amount', bal), true); return; }
+    const cu = uuid(), p = { client_uuid:cu, customer_id:+el.dataset.cid, amount:amt, method, collected_at:new Date().toISOString() };
+    if (el.dataset.kind === 'invoice') p.invoice_id = +el.dataset.id; else p.opening_receivable_id = +el.dataset.id;
+    Dev.enqueue('record_collection', cu, p); toast(t('payment_saved')); render();
+  },
+  // --- admin
+  async dispatch(el){ await admCall('dispatch_transfer', { transfer_id:+el.dataset.id }, t('dispatched')); },
+  cancelT(el){ admCall('cancel_transfer', { transfer_id:+el.dataset.id }); },
+  resolveDispute(el){ openForm(t('resolve_dispute'), [{ id:'note', label:t('resolution_note'), type:'textarea', hint:t('dispute_hint') }], v => admCall('resolve_dispute', { transfer_id:+el.dataset.id, note:v.note })); },
+  supplierRecv(){ const s = AS(); openForm(t('receive_supplier'), [{ id:'p', label:t('product'), type:'select', options:s.products.map(p => [p.id, pname(p)]) }, { id:'q', label:t('cartons'), type:'number', min:1 }, { id:'n', label:t('note') }], v => admCall('receive_from_supplier', { product_id:+v.p, qty:Number(v.q), note:v.n || null })); },
+  adjustWh(){ const s = AS(); openForm(t('adjust_stock') + ' — ' + t('warehouse'), [{ id:'p', label:t('product'), type:'select', options:s.products.map(p => [p.id, pname(p)]) }, { id:'d', label:t('change'), type:'number', hint:t('delta_hint') }, { id:'r', label:t('reason'), type:'textarea' }], v => admCall('adjust_stock', { location:'warehouse', product_id:+v.p, delta:Number(v.d), reason:v.r })); },
+  adjustVan(){ const s = AS(); openForm(t('adjust_stock') + ' — ' + t('van'), [{ id:'rep', label:t('rep'), type:'select', options:s.users.filter(u => u.role === 'rep').map(u => [u.id, u.full_name]) }, { id:'p', label:t('product'), type:'select', options:s.products.map(p => [p.id, pname(p)]) }, { id:'d', label:t('change'), type:'number', hint:t('delta_hint') }, { id:'r', label:t('reason'), type:'textarea' }], v => admCall('adjust_stock', { location:'van', rep_id:v.rep, product_id:+v.p, delta:Number(v.d), reason:v.r })); },
+  setReorder(el){ const w = Server.whRow(+el.dataset.id); openForm(t('reorder_level'), [{ id:'r', label:t('reorder_level'), type:'number', value:w.reorder, min:0 }], v => admCall('admin_set_reorder', { product_id:+el.dataset.id, reorder:Number(v.r) })); },
+  resolveExc(el){ openForm(t('resolve'), [{ id:'n', label:t('resolution_note'), type:'textarea', hint:t('exc_hint') }], v => admCall('resolve_stock_exception', { id:+el.dataset.id, note:v.n })); },
+  invDetail(el){
+    const s = AS(), i = s.invoices.find(x => x.id === +el.dataset.id), c = custOf(s, i.customer_id);
+    const maps = (l) => l ? `<a target="_blank" rel="noopener" href="https://www.google.com/maps?q=${l.lat},${l.lng}"><span class="num">${l.lat.toFixed(5)}, ${l.lng.toFixed(5)}</span></a>` : '–';
+    openModal(`<div class="row between"><h2><span class="num">${esc(i.invoice_number)}</span></h2><button class="btn ghost sm" data-a="closeModal">${t('close')}</button></div>
+      <div class="stack" style="margin-top:.8rem"><div>${esc(i.shop_name_snapshot)} · ${esc(repName(s, i.rep_id))}</div>
+      ${tbl([t('product'), t('qty'), t('price'), t('total')], i.items.map(x => [esc(pname(prodOf(s, x.product_id))), N(x.qty), money(x.unit_price), money(x.line_total)]))}
+      <div class="row between"><span>${t('subtotal')}</span>${money(i.subtotal)}</div><div class="row between"><span>${t('vat')}</span>${money(i.vat_amount)}</div><div class="row between"><b>${t('total')}</b><b>${money(i.total)}</b></div>
+      <div class="row between"><span>${t('balance')}</span>${money(i.balance_due)}</div>
+      <div class="card"><b>${t('location')}</b><div class="small">${t('submitted_at')}: ${maps(i.loc)}</div><div class="small">${t('shop_location')}: ${maps(c.loc)}</div><div class="small">${t('distance')}: <b class="num">${Math.round(i.distance_from_shop_m || 0)} m</b> · ${t('accuracy')}: <span class="num">${Math.round(i.gps_accuracy_m || 0)} m</span></div></div>
+      <div class="row wrap">${i.flags.map(flagChip).join('') || chip('ok', t('no_flags'))}</div></div>`);
+  },
+  importOpen(){ const s = AS(); openForm(t('import_opening'), [{ id:'c', label:t('customer'), type:'select', options:s.customers.map(c => [c.id, c.shop_name]) }, { id:'a', label:t('amount'), type:'number', min:1 }, { id:'d', label:t('due_date'), type:'date', value:todayKey() }, { id:'n', label:t('note'), value:'Balance carried from old books' }], v => admCall('import_opening_receivable', { customer_id:+v.c, amount:Number(v.a), due_date:v.d || null, note:v.n })); },
+  newCustomer(){ const s = AS(); openForm(t('add_shop'), [{ id:'name', label:t('shop_name') }, { id:'phone', label:t('phone') }, { id:'type', label:t('type'), type:'select', options:['repair_shop', 'gas_station', 'banshar', 'other'].map(x => [x, typeLabel(x)]) }, { id:'region', label:t('region'), type:'select', options:s.regions.map(r => [r.id, App.lang === 'ar' ? r.name_ar : r.name_en]) }, { id:'limit', label:t('credit_limit'), type:'number', value:0, min:0 }], v => admCall('add_customer', { client_uuid:uuid(), shop_name:v.name, phone:v.phone, shop_type:v.type, region_id:+v.region, credit_limit:Number(v.limit) })); },
+  editCustomer(el){ const c = custOf(AS(), +el.dataset.id); openForm(c.shop_name, [{ id:'l', label:t('credit_limit'), type:'number', value:c.credit_limit, min:0, hint:t('limit_hint') }, { id:'a', label:t('status'), type:'select', value:c.active ? '1' : '0', options:[['1', t('active')], ['0', t('inactive')]] }], v => admCall('admin_set_customer', { id:c.id, credit_limit:Number(v.l), active:v.a === '1' })); },
+  editProduct(el){ const p = el.dataset.id ? prodOf(AS(), +el.dataset.id) : {};
+    openForm(p.id ? t('edit') : t('add_product'), [{ id:'sku', label:t('sku'), value:p.sku }, { id:'brand', label:t('brand'), value:p.brand }, { id:'name', label:t('product'), value:p.name }, { id:'grade', label:t('viscosity'), value:p.grade },
+      { id:'liters', label:t('liters'), type:'number', value:p.liters }, { id:'upc', label:t('units_per_carton'), type:'number', value:p.upc, min:1 }, { id:'price', label:t('price_carton'), type:'number', value:p.price, min:0, hint:t('price_note') },
+      { id:'active', label:t('status'), type:'select', value:p.id && !p.active ? '0' : '1', options:[['1', t('active')], ['0', t('inactive')]] }],
+      v => admCall('admin_upsert_product', { id:p.id, sku:v.sku.trim(), brand:v.brand.trim(), name:v.name.trim(), grade:v.grade.trim(), type:p.type, liters:v.liters, upc:Number(v.upc), price:Number(v.price), active:v.active === '1' })); },
+  setTarget(el){ const month = todayKey().slice(0, 7), tg = AS().targets.find(x => x.rep_id === el.dataset.id && x.month === month) || {};
+    openForm(t('set_target'), [{ id:'c', label:t('collection_target'), type:'number', value:tg.collection_target || 100000, min:0 }, { id:'k', label:t('carton_target'), type:'number', value:tg.carton_target || '' }], v => admCall('admin_set_target', { rep_id:el.dataset.id, month, collection_target:Number(v.c), carton_target:v.k })); },
+  toggleRep(el){ const u = Server.user(el.dataset.id); if (confirm(u.active ? t('deactivate_confirm') : t('activate_confirm'))) admCall('admin_set_rep_active', { rep_id:u.id, active:!u.active }); },
+};
+document.addEventListener('click', e => { const el = e.target.closest('[data-a]'); if (!el) return; if (el.tagName === 'A') e.preventDefault(); const f = Act[el.dataset.a]; if (f) f(el, e); });
+document.addEventListener('input', e => { const el = e.target.closest('[data-oi]'); if (el && Act[el.dataset.oi]) Act[el.dataset.oi](el, e); });
+document.addEventListener('change', e => {
+  const el = e.target.closest('[data-oc]'); if (!el) return;
+  if (el.dataset.oc === 'admFilter') { App.f[el.dataset.g][el.dataset.k] = el.value; render(); return; }
+  if (Act[el.dataset.oc]) Act[el.dataset.oc](el, e);
+});
+
+
+// ===================== production login, resume, settings panel =====================
+function loginViewRemote(){
+  const exp = Auth.expired && App.uid;
+  if (!configOk()) return `<div class="login stack"><h1>${t('app_name')}</h1><div class="note bad">${t('config_missing')}</div></div>`;
+  return `<div class="login stack"><div class="row between"><h1>${t('app_name')}</h1><button class="btn ghost sm" data-a="lang" data-l="${App.lang === 'ar' ? 'en' : 'ar'}">${App.lang === 'ar' ? 'English' : 'العربية'}</button></div>
+    <div class="muted">${t('login_tag')}</div>${exp ? `<div class="note warn">${t('session_expired')}</div>` : ''}<div id="loginerr"></div>
+    <div class="field"><label for="em">${t('email')}</label><input id="em" type="email" autocomplete="username" inputmode="email" dir="ltr"></div>
+    <div class="field"><label for="pw">${t('password')}</label><input id="pw" type="password" autocomplete="current-password" dir="ltr"></div>
+    <button class="btn block" data-a="doLogin">${t('sign_in')}</button></div>`;
+}
+function demoPanelRemote(){
+  openModal(`<div class="row between"><h2>${t('settings_short')}</h2><button class="btn ghost sm" data-a="closeModal">${t('close')}</button></div>
+    <div class="stack" style="margin-top:1rem"><button class="btn ghost block" data-a="lang" data-l="${App.lang === 'ar' ? 'en' : 'ar'}">${App.lang === 'ar' ? 'English' : 'العربية'}</button>
+    <button class="btn danger block" data-a="logout">${t('logout')}</button><div class="muted small">${t('version_label')} 1.0.0</div></div>`);
+}
+async function enterApp(uid){
+  App.uid = uid;
+  const me = Server.user(uid); if (!me) { Auth.logout(); App.uid = null; render(); return; }
+  if (me.role === 'rep') { Dev.load(uid); RealGPS.start(); }      // start listening for a fix right away
+  App.route = { s:me.role === 'rep' ? 'home' : (me.role === 'admin' ? 'dash' : 'transfers'), p:{} };
+  App.hist = []; afterLogin(); if (me.role === 'rep' && me.active) { await Dev.refresh(); Dev.sync(true); } render(); window.scrollTo(0, 0);
+}
+Act.doLogin = async function(){
+  const em = ($('#em') || {}).value || '', pw = ($('#pw') || {}).value || '', box = $('#loginerr');
+  if (!em || !pw) return;
+  try {
+    await Auth.login(em, pw); await Remote.refresh(); await enterApp(Auth.session.uid);
+  } catch(e){ if (box) box.innerHTML = `<div class="note bad">${e instanceof NetError ? t('no_connection') : t('bad_login')}</div>`; }
+};
+Act.loginAs = undefined;
+window.addEventListener('online', () => { if (Dev.uid) Dev.sync(true); });
+
+(async function boot(){
+  const prefs = store.get('oilrep.app') || {}; if (prefs.lang) App.lang = prefs.lang;
+  applyLang();
+  if (!configOk() || !Auth.session) { render(); return; }
+  const uid = Auth.session.uid;
+  try { await Remote.refresh(); }
+  catch(e){
+    if (e instanceof AuthExpired) { App.uid = uid; Auth.expired = true; Dev.load(uid); render(); return; }
+    // offline start: use what this phone already downloaded
+    Dev.load(uid); if (!Dev.st.cache) { render(); return; }
+  }
+  await enterApp(uid);
+})();
+if ('serviceWorker' in navigator && /^https?:/.test(location.protocol)) navigator.serviceWorker.register('sw.js').catch(() => {});
+
+
+</script>
+</body>
+</html>

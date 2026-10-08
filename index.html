@@ -38,6 +38,9 @@ a{color:var(--pet)}
 .field{display:flex;flex-direction:column;gap:.3rem}.field label{font-size:.85rem;color:var(--muted);font-weight:500}
 input,select,textarea{width:100%;min-height:46px;padding:.5rem .7rem;border:1.5px solid var(--line);border-radius:10px;background:var(--surface)}
 input[type=checkbox],input[type=radio]{width:auto;min-height:0}
+input[type=file]::file-selector-button{font:inherit;border:0;border-radius:6px;padding:.35rem .7rem;margin-inline-end:.7rem;background:var(--pet-soft);color:var(--pet);cursor:pointer}
+input[aria-invalid=true]{border-color:var(--red)}
+.field-error{color:var(--red)}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
 /* chips */
 .chip{display:inline-flex;align-items:center;gap:.3rem;padding:.1rem .6rem;border-radius:99px;font-size:.78rem;font-weight:600;background:var(--pet-soft);color:var(--pet);white-space:nowrap}
@@ -448,6 +451,16 @@ search_shop:['Search shops','ابحث عن محل'], all_regions:['All regions',
 add_shop:['Add shop','إضافة محل'], shop_name:['Shop name','اسم المحل'], owner:['Owner','المالك'], phone:['Phone','الجوال'], type:['Type','النوع'], region:['Region','المنطقة'],
 type_repair_shop:['Repair shop','ورشة'], type_gas_station:['Gas station','محطة وقود'], type_banshar:['Tyre shop','بنشر'], type_other:['Other','أخرى'],
 shop_saved:['Shop saved. You can invoice it after it syncs.','تم حفظ المحل. يمكنك الفوترة له بعد المزامنة.'], shop_pending_note:['Available after sync','متاح بعد المزامنة'],
+customer_pdf:['Official customer document (PDF only):','مستند العميل الرسمي (PDF فقط):'],
+pdf_hint:['Maximum file size: 5 MB. Optional; uploading requires an internet connection. Leave empty to keep the current document.','الحد الأقصى للملف 5 ميجابايت. اختياري؛ يتطلب الرفع اتصالاً بالإنترنت. اتركه فارغًا للاحتفاظ بالمستند الحالي.'],
+pdf_invalid:['Select a valid, non-empty PDF file no larger than 5 MB.','اختر ملف PDF صالحًا وغير فارغ لا يتجاوز 5 ميجابايت.'],
+pdf_uploading:['Uploading document… {0}%','جارٍ رفع المستند… {0}%'],
+pdf_unavailable:['Unable to save the document. Please try again.','تعذر حفظ المستند. يرجى المحاولة مرة أخرى.'],
+pdf_partial:['The customer was saved, but the document was not. Retry here or attach it from the customer document screen.','تم حفظ العميل، لكن لم يُحفظ المستند. أعد المحاولة هنا أو أرفقه من شاشة مستند العميل.'],
+pdf_no_document:['No document has been attached.','لم يُرفق مستند بعد.'],
+pdf_loading:['Loading document details…','جارٍ تحميل بيانات المستند…'],
+pdf_download:['Download current PDF','تنزيل مستند PDF الحالي'],
+pdf_manage:['Customer document','مستند العميل'],
 draft_exists:['Finish or discard your current draft first.','أكمل المسودة الحالية أو تجاهلها أولاً.'], add_lines:['Products','المنتجات'], carton:['carton','كرتون'], van_empty:['No stock on your van. Request stock first.','لا يوجد مخزون في سيارتك. اطلب بضاعة أولاً.'],
 over_van:['More than the {0} on your van. The server will flag a stock conflict.','أكثر من {0} الموجودة في سيارتك. سيسجل النظام تعارضاً في المخزون.'],
 credit_limit:['Credit limit','الحد الائتماني'], payment:['Payment','الدفع'], pay_cash:['Cash','نقداً'], pay_credit:['Credit','آجل'], pay_split:['Split','جزئي'], pay:['Payment','الدفع'],
@@ -553,24 +566,103 @@ function persistApp(){ store.set('oilrep.app', { lang:App.lang, uid:App.uid, the
 function applyLang(){ document.documentElement.lang = App.lang; document.documentElement.dir = App.lang === 'ar' ? 'rtl' : 'ltr'; document.title = t('app_name'); }
 
 // ---- modal + generic form
-function openModal(html){ closeModal(); const d = document.createElement('div'); d.className = 'scrim'; d.id = 'modal'; d.innerHTML = `<div class="modal" role="dialog" aria-modal="true">${html}</div>`; d.addEventListener('click', e => { if (e.target === d) closeModal(); }); document.body.appendChild(d); const f = d.querySelector('input,select,textarea'); if (f) f.focus(); }
+function openModal(html){ closeModal(); const d = document.createElement('div'); d.className = 'scrim'; d.id = 'modal'; d.innerHTML = `<div class="modal" role="dialog" aria-modal="true">${html}</div>`; d.addEventListener('click', e => { if (e.target === d && !_formBusy) closeModal(); }); document.body.appendChild(d); const f = d.querySelector('input,select,textarea'); if (f) f.focus(); }
 function closeModal(){ const m = $('#modal'); if (m) m.remove(); }
 let _formCb = null;
+let _formBusy = false;
 function openForm(title, fields, onSubmit, submitLabel){
   _formCb = onSubmit;
   const fh = fields.map(f => {
-    const id = 'f_' + f.id, v = f.value == null ? '' : f.value;
+    const id = f.domId || 'f_' + f.id, v = f.value == null ? '' : f.value;
     let inp;
     if (f.type === 'select') inp = `<select id="${id}">${f.options.map(o => `<option value="${esc(o[0])}" ${String(o[0]) === String(v) ? 'selected' : ''}>${esc(o[1])}</option>`).join('')}</select>`;
     else if (f.type === 'textarea') inp = `<textarea id="${id}" rows="2">${esc(v)}</textarea>`;
+    else if (f.type === 'file') inp = `<input id="${id}" type="file" accept=".pdf,application/pdf" aria-describedby="${id}_hint ${id}_error" data-oc="validateCustomerPdf"><span id="${id}_error" class="small field-error" role="alert"></span>${f.customerId ? `<div id="customer_pdf_current" class="small muted" aria-live="polite">${t('pdf_loading')}</div>` : ''}`;
     else inp = `<input id="${id}" type="${f.type || 'text'}" value="${esc(v)}" ${f.min != null ? 'min="' + f.min + '"' : ''} ${f.step ? 'step="' + f.step + '"' : ''} inputmode="${f.type === 'number' ? 'decimal' : 'text'}">`;
-    return `<div class="field"><label for="${id}">${esc(f.label)}</label>${inp}${f.hint ? `<span class="small muted">${esc(f.hint)}</span>` : ''}</div>`;
+    return `<div class="field"><label for="${id}">${esc(f.label)}</label>${inp}${f.hint ? `<span id="${id}_hint" class="small muted">${esc(f.hint)}</span>` : ''}</div>`;
   }).join('');
-  openModal(`<h2>${esc(title)}</h2><div class="stack" style="margin-top:1rem">${fh}</div><div class="row" style="margin-top:1.2rem"><button class="btn grow" data-a="formSubmit">${esc(submitLabel || t('save'))}</button><button class="btn ghost" data-a="closeModal">${t('cancel')}</button></div>`);
+  openModal(`<h2>${esc(title)}</h2><div class="stack" style="margin-top:1rem">${fh}</div><div id="form_status" class="small" role="status" aria-live="polite"></div><div class="row" style="margin-top:1.2rem"><button class="btn grow" data-a="formSubmit">${esc(submitLabel || t('save'))}</button><button class="btn ghost" data-a="closeModal">${t('cancel')}</button></div>`);
   _formFields = fields;
+  const documentField = fields.find(field => field.type === 'file' && field.customerId);
+  if (documentField) loadCustomerDocument(documentField.customerId);
 }
 let _formFields = [];
-function formValues(){ const o = {}; _formFields.forEach(f => { const el = $('#f_' + f.id); o[f.id] = el ? el.value : ''; }); return o; }
+function formValues(){ const o = {}; _formFields.forEach(f => { const el = $('#' + (f.domId || 'f_' + f.id)); o[f.id] = el ? (f.type === 'file' ? el.files[0] || null : el.value) : ''; }); return o; }
+
+function customerPdfField(customerId){ return { id:'customer_pdf', domId:'customer_pdf', type:'file', label:t('customer_pdf'), hint:t('pdf_hint'), customerId }; }
+function pdfMetadataValid(file){ return !file || (/\.pdf$/i.test(file.name) && !/[\u0000-\u001f\u007f/\\]/.test(file.name) && file.name.length <= 255 && file.size > 0 && file.size <= 5 * 1024 * 1024 && (!file.type || file.type === 'application/pdf')); }
+function validateCustomerPdf(input){
+  const valid = pdfMetadataValid(input.files[0]);
+  input.setCustomValidity(valid ? '' : t('pdf_invalid'));
+  input.setAttribute('aria-invalid', String(!valid));
+  const error = $('#customer_pdf_error'); if (error) error.textContent = valid ? '' : t('pdf_invalid');
+  return valid;
+}
+function formStatus(message, bad){ const box = $('#form_status'); if (box) { box.textContent = message; box.className = bad ? 'small field-error' : 'small muted'; } }
+async function documentRequest(customerId, options, query){
+  let response;
+  try { response = await fetch('/.netlify/functions/customer-document?customer=' + encodeURIComponent(customerId) + (query || ''), { ...options, cache:'no-store', headers:{ Authorization:'Bearer ' + await Auth.token(), ...(options && options.headers || {}) } }); }
+  catch(error){ throw new NetError(t('no_connection')); }
+  if (response.status === 401) { Auth.expired = true; throw new AuthExpired(t('sign_in')); }
+  if (!response.ok) {
+    const result = await response.json().catch(() => ({}));
+    throw new BizError(t(result.error === 'no_document' ? 'pdf_no_document' : result.error === 'invalid_pdf' ? 'pdf_invalid' : response.status === 403 ? 'not_allowed' : 'pdf_unavailable'));
+  }
+  return response;
+}
+async function loadCustomerDocument(customerId){
+  const box = $('#customer_pdf_current');
+  try {
+    const document = await (await documentRequest(customerId)).json();
+    if (box && box.isConnected) box.innerHTML = `<div>${esc(document.filename)} · <span class="num">${(document.size / 1024 / 1024).toFixed(2)} MB</span></div><button class="btn ghost sm" data-a="downloadCustomerPdf" data-id="${esc(customerId)}">${t('pdf_download')}</button>`;
+  } catch(error){ if (box && box.isConnected) box.textContent = error.message; }
+}
+async function uploadCustomerPdf(customerId, file){
+  const { uploadId } = await (await documentRequest(customerId, { method:'POST', headers:{ 'Content-Type':'application/json' }, body:JSON.stringify({ filename:file.name, size:file.size }) })).json();
+  const chunkSize = 1024 * 1024;
+  for (let offset = 0; offset < file.size; offset += chunkSize) {
+    formStatus(t('pdf_uploading', Math.round(offset / file.size * 100)));
+    await documentRequest(customerId, { method:'PUT', headers:{ 'Content-Type':'application/octet-stream' }, body:file.slice(offset, offset + chunkSize) }, '&upload=' + uploadId + '&part=' + offset / chunkSize);
+  }
+  await documentRequest(customerId, { method:'POST' }, '&upload=' + uploadId);
+  formStatus(t('pdf_uploading', 100));
+}
+function newCustomerSaver(){
+  let customerId = null;
+  let customerSaved = false;
+  let previousIds = null;
+  let savedPayload = null;
+  const saveCustomer = async (payload, file) => {
+    try {
+      if (savedPayload) payload = savedPayload;
+      if (!customerId) {
+        if (!previousIds) previousIds = new Set((Server.db.customers || []).map(customer => String(customer.id)));
+        const result = await api(App.uid, 'add_customer', payload);
+        customerSaved = true;
+        savedPayload = payload;
+        const modal = $('#modal');
+        if (modal) modal.querySelectorAll('input:not([type=file]),select,textarea').forEach(control => control.dataset.customerSaved = 'true');
+        customerId = typeof result === 'number' || typeof result === 'string' ? result : result && (result.customer_id || result.id);
+        await Remote.refresh();
+        if (!customerId) {
+          const matches = Server.db.customers.filter(customer => customer.client_uuid === payload.client_uuid || (!previousIds.has(String(customer.id)) && customer.shop_name === payload.shop_name && String(customer.region_id) === String(payload.region_id)));
+          if (matches.length === 1) customerId = matches[0].id;
+        }
+      }
+      if (file) {
+        if (!customerId) throw new BizError(t('pdf_partial'));
+        await uploadCustomerPdf(customerId, file);
+      }
+      if (Dev.uid) await Dev.refresh();
+      toast(t('saved')); closeModal(); render();
+    } catch(error){
+      if (customerSaved && file) throw new BizError(t('pdf_partial'));
+      throw error;
+    }
+  };
+  saveCustomer.hasSaved = () => customerSaved;
+  return saveCustomer;
+}
 
 // ---- status chips
 const trChip = s => chip({ Pending:'warn', 'In-Transit':'', Received:'ok', Disputed:'bad', Cancelled:'grey', PendingSync:'warn' }[s] || 'grey', t('st_' + s));
@@ -781,7 +873,7 @@ function custListHTML(q, region, mode){
     return `<div class="card ${mode === 'visit' && !pend ? 'tap' : ''}" ${mode === 'visit' && !pend ? `data-a="pickCustomer" data-id="${c.id}"` : ''}>
     <div class="row between"><b>${esc(c.shop_name)}</b>${pend ? chip('warn', t('inv_pending')) : chip('grey', typeLabel(c.type))}</div>
     <div class="muted small">${esc(regName(c.region_id))}${c.phone ? ' · <span class="num">' + esc(c.phone) + '</span>' : ''}${out > 0 ? ' · ' + t('owed') + ' ' + money0(out) : ''}</div>
-    ${mode === 'browse' && !pend ? `<div class="row" style="margin-top:.5rem"><button class="btn sm" data-a="pickCustomer" data-id="${c.id}">${t('start_visit')}</button>${out > 0 ? `<button class="btn ghost sm" data-a="go" data-s="collect" data-cid="${c.id}">${t('collect_payment')}</button>` : ''}</div>` : ''}
+    ${mode === 'browse' && !pend ? `<div class="row wrap" style="margin-top:.5rem"><button class="btn sm" data-a="pickCustomer" data-id="${c.id}">${t('start_visit')}</button><button class="btn ghost sm" data-a="customerDocument" data-id="${c.id}">${t('pdf_manage')}</button>${out > 0 ? `<button class="btn ghost sm" data-a="go" data-s="collect" data-cid="${c.id}">${t('collect_payment')}</button>` : ''}</div>` : ''}
     ${pend && mode === 'visit' ? `<div class="small muted">${t('shop_pending_note')}</div>` : ''}</div>`; }).join('');
 }
 
@@ -952,8 +1044,48 @@ async function admCall(name, payload, msg){
 function afterLogin(){ persistApp(); Dev.onChange = softRender; if (Server.user(App.uid).role === 'rep') Dev.start(); else Dev.stop(); }
 const Act = {
   // --- common
-  closeModal, lang(el){ App.lang = el.dataset.l; persistApp(); closeModal(); render(); },
-  formSubmit(){ if (_formCb) _formCb(formValues()); },
+  closeModal(){ if (!_formBusy) closeModal(); }, lang(el){ App.lang = el.dataset.l; persistApp(); closeModal(); render(); },
+  validateCustomerPdf,
+  async formSubmit(){
+    if (!_formCb || _formBusy) return;
+    const input = $('#customer_pdf');
+    if (input && !validateCustomerPdf(input)) { input.reportValidity(); return; }
+    const values = formValues(), modal = $('#modal');
+    _formBusy = true;
+    const controls = modal ? [...modal.querySelectorAll('input,select,textarea,button')] : [];
+    controls.forEach(control => control.disabled = true);
+    try {
+      if (values.customer_pdf) {
+        const file = values.customer_pdf;
+        const header = await file.slice(0, 8).text(), tail = await file.slice(Math.max(0, file.size - 1024)).text();
+        if (!/^%PDF-\d\.\d/.test(header) || !/%%EOF[\s\u0000]*$/.test(tail)) throw new BizError(t('pdf_invalid'));
+      }
+      await _formCb(values);
+    } catch(error){ formStatus(error instanceof NetError ? t('no_connection') : error.message, true); }
+    finally { _formBusy = false; controls.forEach(control => control.disabled = control.dataset.customerSaved === 'true'); }
+  },
+  customerDocument(el){
+    const customerId = el.dataset.id;
+    openForm(t('pdf_manage'), [customerPdfField(customerId)], async values => {
+      if (!values.customer_pdf) { closeModal(); return; }
+      await uploadCustomerPdf(customerId, values.customer_pdf);
+      toast(t('saved')); closeModal();
+    });
+  },
+  async downloadCustomerPdf(el){
+    if (_formBusy) return;
+    el.disabled = true;
+    try {
+      const response = await documentRequest(el.dataset.id, undefined, '&download=1');
+      const blob = await response.blob(), objectUrl = URL.createObjectURL(blob);
+      const disposition = response.headers.get('Content-Disposition') || '';
+      const filename = disposition.match(/filename\*=UTF-8''([^;]+)/);
+      const link = document.createElement('a'); link.href = objectUrl; link.download = filename ? decodeURIComponent(filename[1]) : 'customer-document.pdf';
+      document.body.appendChild(link); link.click(); link.remove();
+      setTimeout(() => URL.revokeObjectURL(objectUrl), 60000);
+    } catch(error){ toast(error.message, true); }
+    finally { el.disabled = false; }
+  },
   demo(){ (typeof demoPanelRemote === 'function' ? demoPanelRemote : demoPanel)(); },
   toggleOffline(){ Net.offline = !Net.offline; closeModal(); render(); toast(Net.offline ? t('airplane_on_msg') : t('back_online')); if (!Net.offline && Dev.uid) Dev.sync(true); },
   loseNext(){ Net.loseNext = 2; closeModal(); toast(t('lose_set')); },
@@ -1001,12 +1133,14 @@ const Act = {
   custSearch(){ const q = ($('#q') || {}).value, r = ($('#regionf') || {}).value; const mode = App.route.s === 'visit' ? 'visit' : 'browse'; $('#custlist').innerHTML = custListHTML(q, r, mode); },
   addShop(){
     const regs = Dev.c().regions.map(r => [r.id, App.lang === 'ar' ? r.name_ar : r.name_en]);
+    const clientUuid = uuid(), saveCustomer = newCustomerSaver();
     openForm(t('add_shop'), [{ id:'name', label:t('shop_name') }, { id:'owner', label:t('owner') }, { id:'phone', label:t('phone'), type:'tel' },
       { id:'type', label:t('type'), type:'select', options:['repair_shop', 'gas_station', 'banshar', 'other'].map(x => [x, typeLabel(x)]) },
-      { id:'region', label:t('region'), type:'select', options:regs, value:(Dev.c().me || {}).region_id }], v => {
+      { id:'region', label:t('region'), type:'select', options:regs, value:(Dev.c().me || {}).region_id }, customerPdfField()], async v => {
       if (!v.name.trim()) { toast(t('shop_name') + ' ?', true); return; }
-      const g = Dev.gps(null); if (g.denied) { toast(t('gps_denied'), true); return; }
-      const cu = uuid(), p = { client_uuid:cu, shop_name:v.name.trim(), owner_name:v.owner || null, phone:v.phone || null, shop_type:v.type, region_id:+v.region, lat:g.lat, lng:g.lng };
+      const g = Dev.gps(null); if (g.denied && !saveCustomer.hasSaved()) { toast(t('gps_denied'), true); return; }
+      const cu = clientUuid, p = { client_uuid:cu, shop_name:v.name.trim(), owner_name:v.owner || null, phone:v.phone || null, shop_type:v.type, region_id:+v.region, lat:g.lat, lng:g.lng };
+      if (v.customer_pdf || saveCustomer.hasSaved()) { await saveCustomer(p, v.customer_pdf); return; }
       Dev.c().customers.push({ id:'tmp-' + cu, shop_name:p.shop_name, owner:p.owner_name, phone:p.phone, type:p.shop_type, region_id:p.region_id, loc:{ lat:g.lat, lng:g.lng }, credit_limit:0, active:true, _pending:true });
       Dev.enqueue('add_customer', cu, p); closeModal(); render(); toast(t('shop_saved'));
     }, t('add_shop'));
@@ -1080,8 +1214,20 @@ const Act = {
       <div class="row wrap">${i.flags.map(flagChip).join('') || chip('ok', t('no_flags'))}</div></div>`);
   },
   importOpen(){ const s = AS(); openForm(t('import_opening'), [{ id:'c', label:t('customer'), type:'select', options:s.customers.map(c => [c.id, c.shop_name]) }, { id:'a', label:t('amount'), type:'number', min:1 }, { id:'d', label:t('due_date'), type:'date', value:todayKey() }, { id:'n', label:t('note'), value:'Balance carried from old books' }], v => admCall('import_opening_receivable', { customer_id:+v.c, amount:Number(v.a), due_date:v.d || null, note:v.n })); },
-  newCustomer(){ const s = AS(); openForm(t('add_shop'), [{ id:'name', label:t('shop_name') }, { id:'phone', label:t('phone') }, { id:'type', label:t('type'), type:'select', options:['repair_shop', 'gas_station', 'banshar', 'other'].map(x => [x, typeLabel(x)]) }, { id:'region', label:t('region'), type:'select', options:s.regions.map(r => [r.id, App.lang === 'ar' ? r.name_ar : r.name_en]) }, { id:'limit', label:t('credit_limit'), type:'number', value:0, min:0 }], v => admCall('add_customer', { client_uuid:uuid(), shop_name:v.name, phone:v.phone, shop_type:v.type, region_id:+v.region, credit_limit:Number(v.limit) })); },
-  editCustomer(el){ const c = custOf(AS(), +el.dataset.id); openForm(c.shop_name, [{ id:'l', label:t('credit_limit'), type:'number', value:c.credit_limit, min:0, hint:t('limit_hint') }, { id:'a', label:t('status'), type:'select', value:c.active ? '1' : '0', options:[['1', t('active')], ['0', t('inactive')]] }], v => admCall('admin_set_customer', { id:c.id, credit_limit:Number(v.l), active:v.a === '1' })); },
+  newCustomer(){
+    const s = AS(), clientUuid = uuid(), saveCustomer = newCustomerSaver();
+    openForm(t('add_shop'), [{ id:'name', label:t('shop_name') }, { id:'phone', label:t('phone') }, { id:'type', label:t('type'), type:'select', options:['repair_shop', 'gas_station', 'banshar', 'other'].map(x => [x, typeLabel(x)]) }, { id:'region', label:t('region'), type:'select', options:s.regions.map(r => [r.id, App.lang === 'ar' ? r.name_ar : r.name_en]) }, { id:'limit', label:t('credit_limit'), type:'number', value:0, min:0 }, customerPdfField()], v => {
+      if (!v.name.trim()) throw new BizError(t('shop_name'));
+      return saveCustomer({ client_uuid:clientUuid, shop_name:v.name.trim(), phone:v.phone, shop_type:v.type, region_id:+v.region, credit_limit:Number(v.limit) }, v.customer_pdf);
+    });
+  },
+  editCustomer(el){
+    const c = custOf(AS(), +el.dataset.id);
+    openForm(c.shop_name, [{ id:'l', label:t('credit_limit'), type:'number', value:c.credit_limit, min:0, hint:t('limit_hint') }, { id:'a', label:t('status'), type:'select', value:c.active ? '1' : '0', options:[['1', t('active')], ['0', t('inactive')]] }, customerPdfField(c.id)], async v => {
+      if (v.customer_pdf) await uploadCustomerPdf(c.id, v.customer_pdf);
+      await admCall('admin_set_customer', { id:c.id, credit_limit:Number(v.l), active:v.a === '1' });
+    });
+  },
   editProduct(el){ const p = el.dataset.id ? prodOf(AS(), +el.dataset.id) : {};
     openForm(p.id ? t('edit') : t('add_product'), [{ id:'sku', label:t('sku'), value:p.sku }, { id:'brand', label:t('brand'), value:p.brand }, { id:'name', label:t('product'), value:p.name }, { id:'grade', label:t('viscosity'), value:p.grade },
       { id:'liters', label:t('liters'), type:'number', value:p.liters }, { id:'upc', label:t('units_per_carton'), type:'number', value:p.upc, min:1 }, { id:'price', label:t('price_carton'), type:'number', value:p.price, min:0, hint:t('price_note') },

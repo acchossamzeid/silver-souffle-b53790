@@ -2,6 +2,31 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8">
+<script>
+(function(){
+  var failed = [];
+  function show(){
+    var b = document.getElementById('loadfail');
+    if (!b) { b = document.createElement('div'); b.id = 'loadfail';
+      b.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999;background:#B3302F;color:#fff;padding:14px;font:15px/1.7 Arial,sans-serif;direction:rtl;text-align:right';
+      (document.body || document.documentElement).appendChild(b); }
+    b.innerHTML = '<b>ملفات التطبيق لم تُرفع كاملة. App files are missing.</b><br>لم يتم تحميل: <code dir="ltr" style="background:#0003;padding:2px 6px;border-radius:4px">' + failed.join(' , ') + '</code>' +
+      '<br>ارفع كل الملفات (23 ملفاً) في أول المستودع بدون مجلدات، ثم حدّث الصفحة مرتين.' +
+      '<br><span dir="ltr" style="display:block;text-align:left">Upload ALL 23 files at the top level (no folders), then reload twice.</span>';
+  }
+  window.addEventListener('error', function(e){            // capture phase: catches scripts/styles that failed to load
+    var t = e.target;
+    if (t && (t.tagName === 'SCRIPT' || t.tagName === 'LINK')) {
+      var u = t.src || t.href || '';
+      if (u.indexOf(location.origin) === 0) { failed.push(u.slice(location.origin.length).replace(/^\//, '')); show(); }   // own files only, not Google Fonts
+    }
+  }, true);
+  setTimeout(function(){
+    var r = document.getElementById('root');
+    if (r && !r.innerHTML.trim() && !failed.length) { failed.push('(الصفحة لم تبدأ - the page did not start; press F12 and read the Console)'); show(); }
+  }, 4000);
+})();
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0E5A6B">
 <title>نظام مندوبي الزيوت</title>
@@ -10,27 +35,27 @@
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="style.css">
 <script src="config.js"></script>
 </head>
 <body>
 <div id="root"></div>
 <noscript>يلزم تفعيل JavaScript لتشغيل التطبيق. JavaScript must be enabled.</noscript>
 <!-- order matters: the two libraries first, then each file uses the ones above it -->
-<script src="js/html5-qrcode.min.js"></script>
-<script src="js/qrcode.min.js"></script>
-<script src="js/util.js"></script>
-<script src="js/views.js"></script>
-<script src="js/net_remote.js"></script>
-<script src="js/device.js"></script>
-<script src="js/gps_real.js"></script>
-<script src="js/i18n.js"></script>
-<script src="js/ui_core.js"></script>
-<script src="js/ui_rep.js"></script>
-<script src="js/ui_admin.js"></script>
-<script src="js/handover.js"></script>
-<script src="js/main.js"></script>
-<script src="js/remote_ui.js"></script>
-<script src="js/boot_remote.js"></script>
+<script src="html5-qrcode.min.js"></script>
+<script src="qrcode.min.js"></script>
+<script src="util.js"></script>
+<script src="views.js"></script>
+<script src="net_remote.js"></script>
+<script src="device.js"></script>
+<script src="gps_real.js"></script>
+<script src="i18n.js"></script>
+<script src="ui_core.js"></script>
+<script src="ui_rep.js"></script>
+<script src="ui_admin.js"></script>
+<script src="handover.js"></script>
+<script src="main.js"></script>
+<script src="remote_ui.js"></script>
+<script src="boot_remote.js"></script>
 </body>
 </html>

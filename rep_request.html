@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1B2A34">
+<title>طلب كميات من المستودع</title>
+
+<!-- الخط -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;700&display=swap" rel="stylesheet">
+
+<!-- ========== المكتبات الخارجية (CDN) ========== -->
+<!-- Supabase JS -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<!-- qrcode.js : توليد كود QR -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<style>
+  :root{
+    --ink:#1B2A34;
+    --ink-2:#52646F;
+    --ground:#E4E8EA;
+    --paper:#FFFFFF;
+    --line:#C9D1D6;
+    --signal:#F2C200;
+    --ok:#1F7A4D;
+    --bad:#B42318;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    font-family:"IBM Plex Sans Arabic",Tahoma,system-ui,sans-serif;
+    background:var(--ground);
+    color:var(--ink);
+    line-height:1.7;
+    min-height:100vh;
+    padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+    transition:background .25s,color .25s;
+  }
+  /* وضع عرض QR: خلفية داكنة لإبراز الكود */
+  body.qr-mode{background:var(--ink);color:#fff}
+
+  .app{max-width:520px;margin:0 auto;padding:20px 16px 40px}
+  h1{font-size:1.45rem;margin:8px 0 4px;font-weight:700}
+  .sub{margin:0 0 20px;color:var(--ink-2)}
+  body.qr-mode .sub{color:#B9C5CC}
+  .hidden{display:none !important}
+
+  /* ---------- النموذج ---------- */
+  .card{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px}
+  label{display:block;font-weight:500;margin-bottom:6px}
+  input,textarea{
+    width:100%;font:inherit;color:var(--ink);background:#fff;
+    border:1.5px solid var(--line);border-radius:8px;padding:10px 12px;
+  }
+  input:focus,textarea:focus,button:focus-visible{outline:3px solid var(--signal);outline-offset:1px;border-color:var(--ink)}
+  textarea{resize:vertical;min-height:70px}
+
+  .item-row{display:grid;grid-template-columns:1fr 84px 44px;gap:8px;margin-bottom:10px;align-items:center}
+  .icon-btn{
+    height:44px;border:1.5px solid var(--line);background:#fff;border-radius:8px;
+    font-size:1.2rem;cursor:pointer;color:var(--ink-2)
+  }
+  .btn{
+    display:block;width:100%;font:inherit;font-weight:700;font-size:1.05rem;
+    padding:14px 16px;border-radius:10px;border:0;cursor:pointer;
+  }
+  .btn-primary{background:var(--signal);color:var(--ink)}
+  .btn-primary:disabled{opacity:.6;cursor:wait}
+  .btn-ghost{background:transparent;color:inherit;border:1.5px solid currentColor;margin-top:12px}
+  .btn-add{background:#fff;border:1.5px dashed var(--ink-2);color:var(--ink);padding:10px;margin-top:4px}
+
+  .error{
+    background:#FDECEA;color:var(--bad);border:1px solid #F3B8B2;
+    border-radius:8px;padding:10px 12px;margin-bottom:14px;
+  }
+
+  /* ---------- شاشة QR ---------- */
+  .pill{
+    display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:999px;
+    background:rgba(242,194,0,.16);color:var(--signal);font-weight:500;
+  }
+  .pill::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--signal);animation:pulse 1.6s ease-in-out infinite}
+  @keyframes pulse{50%{opacity:.3}}
+  @media (prefers-reduced-motion:reduce){.pill::before{animation:none}}
+
+  .qr-wrap{display:flex;flex-direction:column;align-items:center;margin:20px 0 8px}
+  .qr-tile{background:#fff;padding:16px;border-radius:18px;line-height:0}
+  #qrBox img,#qrBox canvas{display:block;max-width:100%;height:auto}
+  .code{
+    margin-top:14px;font-size:1.5rem;font-weight:700;letter-spacing:.14em;
+    direction:ltr;font-variant-numeric:tabular-nums;
+  }
+  .hint{text-align:center;color:#B9C5CC;margin:6px 0 18px}
+  .summary{background:rgba(255,255,255,.08);border-radius:12px;padding:12px 16px}
+  .summary ul{list-style:none;margin:0;padding:0}
+  .summary li{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.12)}
+  .summary li:last-child{border-bottom:0}
+
+  /* ---------- شاشة الاستلام ---------- */
+  .done{text-align:center;padding:40px 8px}
+  .done svg{width:96px;height:96px}
+  .done h2{font-size:1.5rem;margin:12px 0 4px}
+</style>
+</head>
+<body>
+<main class="app">
+
+  <h1 id="title">طلب كميات من المستودع</h1>
+  <p class="sub" id="subtitle">أدخل الأصناف المطلوبة، وبعد الإرسال سيظهر رمز الاستلام.</p>
+
+  <div id="globalError" class="error hidden" role="alert"></div>
+
+  <!-- ========== 1) نموذج الطلب ========== -->
+  <section id="viewForm">
+    <div class="card">
+      <label for="repName">اسم المندوب</label>
+      <input id="repName" type="text" autocomplete="name" placeholder="مثال: أحمد العتيبي">
+    </div>
+
+    <div class="card">
+      <label>الأصناف والكميات</label>
+      <div id="items"></div>
+      <button type="button" class="btn btn-add" id="addItem">+ إضافة صنف</button>
+    </div>
+
+    <div class="card">
+      <label for="notes">ملاحظات (اختياري)</label>
+      <textarea id="notes"></textarea>
+    </div>
+
+    <div id="formError" class="error hidden" role="alert"></div>
+    <button type="button" class="btn btn-primary" id="submitBtn">إرسال الطلب</button>
+
+    <datalist id="productsList"></datalist>
+  </section>
+
+  <!-- ========== 2) عرض QR لأمين المستودع ========== -->
+  <section id="viewQR" class="hidden">
+    <div class="pill">بانتظار مسح أمين المستودع</div>
+
+    <div class="qr-wrap">
+      <div class="qr-tile"><div id="qrBox" aria-label="رمز QR لاستلام العهدة" role="img"></div></div>
+      <div class="code" id="shortCode"></div>
+    </div>
+    <p class="hint">اعرض هذه الشاشة لأمين المستودع ليمسح الرمز</p>
+
+    <div class="summary"><ul id="summaryList"></ul></div>
+    <button type="button" class="btn btn-ghost" id="newReqFromQR">طلب جديد</button>
+  </section>
+
+  <!-- ========== 3) تم الاستلام ========== -->
+  <section id="viewDone" class="hidden">
+    <div class="done">
+      <svg viewBox="0 0 96 96" aria-hidden="true">
+        <circle cx="48" cy="48" r="44" fill="#1F7A4D"/>
+        <path d="M28 49l14 14 27-30" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <h2>تم استلام العهدة</h2>
+      <p id="doneTime" class="sub"></p>
+    </div>
+    <button type="button" class="btn btn-primary" id="newReqFromDone">طلب جديد</button>
+  </section>
+
+</main>
+
+<script>
+/* =====================================================================
+   إعدادات المشروع — عدّل هذه القيم فقط
+   ===================================================================== */
+const CONFIG = {
+  SUPABASE_URL: 'https://YOUR_PROJECT_ID.supabase.co', // رابط مشروعك
+  SUPABASE_ANON_KEY: 'YOUR_SUPABASE_ANON_KEY',          // المفتاح العام (anon)
+  TABLE: 'stock_transfers',                              // جدول التحويلات
+  PRODUCTS_TABLE: 'products',                            // (اختياري) جدول الأصناف لاقتراحات الإكمال
+  PRODUCTS_NAME_COLUMN: 'name',
+  QR_PREFIX: 'STT1:',      // بادئة تميّز أكوادنا عن أي QR آخر (يجب أن تطابق شاشة الأمين)
+  POLL_MS: 3000,           // فترة التحقق من حالة الطلب (بالمللي ثانية)
+  STORAGE_KEY: 'rep_active_transfer'
+};
+
+const $ = (id) => document.getElementById(id);
+let db = null;            // عميل Supabase
+let pollTimer = null;     // مؤقّت متابعة الحالة
+let wakeLock = null;      // لمنع انطفاء الشاشة أثناء عرض الكود
+let activeTransfer = null; // الطلب الجاري: { id, token, items, rep_name }
+
+/* ---------------------------- أدوات مساعدة ---------------------------- */
+function showError(el, msg){ el.textContent = msg; el.classList.remove('hidden'); }
+function hideError(el){ el.classList.add('hidden'); el.textContent = ''; }
+
+function showView(name){
+  ['viewForm','viewQR','viewDone'].forEach(v => $(v).classList.add('hidden'));
+  $(name).classList.remove('hidden');
+  document.body.classList.toggle('qr-mode', name === 'viewQR');
+  const titles = {
+    viewForm:['طلب كميات من المستودع','أدخل الأصناف المطلوبة، وبعد الإرسال سيظهر رمز الاستلام.'],
+    viewQR:['رمز استلام العهدة',''],
+    viewDone:['','']
+  };
+  $('title').textContent = titles[name][0];
+  $('subtitle').textContent = titles[name][1];
+  $('subtitle').classList.toggle('hidden', !titles[name][1]);
+  $('title').classList.toggle('hidden', !titles[name][0]);
+}
+
+/* منع انطفاء الشاشة (Wake Lock) — إن كان المتصفح يدعمه */
+async function keepAwake(){
+  try{
+    if ('wakeLock' in navigator && !wakeLock) {
+      wakeLock = await navigator.wakeLock.request('screen');
+      wakeLock.addEventListener('release', () => { wakeLock = null; });
+    }
+  }catch(e){ /* تجاهل: ليس أمراً حرجاً */ }
+}
+function releaseAwake(){ try{ wakeLock && wakeLock.release(); }catch(e){} wakeLock = null; }
+
+/* ---------------------------- صفوف الأصناف ---------------------------- */
+function addRow(product = '', qty = ''){
+  const row = document.createElement('div');
+  row.className = 'item-row';
+  row.innerHTML = `
+    <input type="text" class="p-name" list="productsList" placeholder="اسم الصنف" aria-label="اسم الصنف">
+    <input type="number" class="p-qty" min="1" step="1" inputmode="numeric" placeholder="الكمية" aria-label="الكمية">
+    <button type="button" class="icon-btn" aria-label="حذف الصنف">×</button>`;
+  row.querySelector('.p-name').value = product;
+  row.querySelector('.p-qty').value = qty;
+  row.querySelector('.icon-btn').addEventListener('click', () => {
+    if ($('items').children.length > 1) row.remove();
+  });
+  $('items').appendChild(row);
+}
+
+function collectItems(){
+  const items = [];
+  document.querySelectorAll('#items .item-row').forEach(row => {
+    const product = row.querySelector('.p-name').value.trim();
+    const qty = parseInt(row.querySelector('.p-qty').value, 10);
+    if (product && Number.isInteger(qty) && qty > 0) items.push({ product, qty });
+  });
+  return items;
+}
+
+/* تحميل أسماء الأصناف للاقتراحات (إن وُجد الجدول) */
+async function loadProducts(){
+  try{
+    const { data, error } = await db.from(CONFIG.PRODUCTS_TABLE)
+      .select(CONFIG.PRODUCTS_NAME_COLUMN).limit(500);
+    if (error || !data) return;
+    $('productsList').innerHTML = '';
+    data.forEach(p => {
+      const o = document.createElement('option');
+      o.value = p[CONFIG.PRODUCTS_NAME_COLUMN];
+      $('productsList').appendChild(o);
+    });
+  }catch(e){ /* اختياري */ }
+}
+
+/* ---------------------------- إرسال الطلب ---------------------------- */
+async function submitRequest(){
+  hideError($('formError'));
+  const repName = $('repName').value.trim();
+  const items = collectItems();
+
+  if (!repName){ return showError($('formError'), 'اكتب اسم المندوب.'); }
+  if (!items.length){ return showError($('formError'), 'أضف صنفاً واحداً على الأقل مع كمية صحيحة.'); }
+
+  const btn = $('submitBtn');
+  btn.disabled = true; btn.textContent = 'جارٍ إرسال الطلب…';
+
+  try{
+    localStorage.setItem('rep_name', repName);
+
+    const payload = {
+      rep_name: repName,
+      items: items,                         // عمود jsonb
+      notes: $('notes').value.trim() || null,
+      status: 'pending'
+    };
+    // إن كان المندوب مسجّل دخول عبر Supabase Auth نربط الطلب بحسابه
+    const { data: { session } } = await db.auth.getSession();
+    if (session?.user) payload.rep_id = session.user.id;
+
+    /* إدراج الطلب وجلب verification_token الذي تولّده قاعدة البيانات */
+    const { data, error } = await db.from(CONFIG.TABLE)
+      .insert(payload)
+      .select('id, verification_token')
+      .single();
+
+    if (error) throw error;
+    if (!data?.verification_token) throw new Error('لم يتم استلام verification_token من قاعدة البيانات.');
+
+    activeTransfer = { id: data.id, token: data.verification_token, items, rep_name: repName };
+    localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(activeTransfer)); // لاستعادة الكود عند تحديث الصفحة
+    showQR();
+  }catch(err){
+    console.error(err);
+    showError($('formError'), 'تعذّر إرسال الطلب: ' + (err.message || 'خطأ غير معروف') + '. تحقق من الاتصال وصلاحيات الجدول.');
+  }finally{
+    btn.disabled = false; btn.textContent = 'إرسال الطلب';
+  }
+}
+
+/* ---------------------------- عرض كود QR ---------------------------- */
+function renderQR(token){
+  const box = $('qrBox');
+  box.innerHTML = '';
+  // حجم كبير يملأ عرض الشاشة (بحد أقصى 420 بكسل)
+  const size = Math.max(200, Math.min(window.innerWidth - 80, 420));
+  new QRCode(box, {
+    text: CONFIG.QR_PREFIX + token,   // المحتوى: البادئة + التوكن
+    width: size,
+    height: size,
+    colorDark: '#1B2A34',
+    colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.M
+  });
+}
+
+function showQR(){
+  renderQR(activeTransfer.token);
+  $('shortCode').textContent = activeTransfer.token.slice(0, 8).toUpperCase(); // رمز مختصر للمطابقة البصرية
+
+  const list = $('summaryList');
+  list.innerHTML = '';
+  activeTransfer.items.forEach(it => {
+    const li = document.createElement('li');
+    const a = document.createElement('span'); a.textContent = it.product;
+    const b = document.createElement('strong'); b.textContent = it.qty;
+    li.append(a, b);
+    list.appendChild(li);
+  });
+
+  showView('viewQR');
+  keepAwake();
+  startPolling();
+}
+
+/* ---------------------------- متابعة حالة الطلب ---------------------------- */
+function startPolling(){
+  stopPolling();
+  pollTimer = setInterval(checkStatus, CONFIG.POLL_MS);
+}
+function stopPolling(){ if (pollTimer){ clearInterval(pollTimer); pollTimer = null; } }
+
+async function checkStatus(){
+  if (!activeTransfer) return;
+  try{
+    const { data, error } = await db.from(CONFIG.TABLE)
+      .select('status, completed_at')
+      .eq('id', activeTransfer.id)
+      .single();
+    if (error) return;               // نتجاهل أخطاء الشبكة المؤقتة
+    if (data.status === 'completed') showDone(data.completed_at);
+  }catch(e){}
+}
+
+function showDone(completedAt){
+  stopPolling(); releaseAwake();
+  localStorage.removeItem(CONFIG.STORAGE_KEY);
+  const d = completedAt ? new Date(completedAt) : new Date();
+  $('doneTime').textContent = d.toLocaleString('ar-SA', { dateStyle:'medium', timeStyle:'short' });
+  if (navigator.vibrate) navigator.vibrate(200);
+  showView('viewDone');
+}
+
+/* ---------------------------- طلب جديد ---------------------------- */
+function resetForNewRequest(askConfirm){
+  if (askConfirm && !confirm('الطلب الحالي لم يُستلم بعد. هل تريد بدء طلب جديد؟')) return;
+  stopPolling(); releaseAwake();
+  activeTransfer = null;
+  localStorage.removeItem(CONFIG.STORAGE_KEY);
+  $('items').innerHTML = ''; addRow();
+  $('notes').value = '';
+  hideError($('formError'));
+  showView('viewForm');
+}
+
+/* ---------------------------- التهيئة ---------------------------- */
+async function init(){
+  addRow();
+  $('repName').value = localStorage.getItem('rep_name') || '';
+  $('addItem').addEventListener('click', () => addRow());
+  $('submitBtn').addEventListener('click', submitRequest);
+  $('newReqFromQR').addEventListener('click', () => resetForNewRequest(true));
+  $('newReqFromDone').addEventListener('click', () => resetForNewRequest(false));
+
+  // إعادة الرسم عند تدوير الجوال
+  let rt; window.addEventListener('resize', () => {
+    clearTimeout(rt);
+    rt = setTimeout(() => { if (activeTransfer && !$('viewQR').classList.contains('hidden')) renderQR(activeTransfer.token); }, 250);
+  });
+  // عند العودة للتطبيق: أعد قفل الشاشة وتحقق فوراً من الحالة
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && activeTransfer){ keepAwake(); checkStatus(); }
+  });
+
+  // التحقق من الإعدادات والمكتبات
+  if (CONFIG.SUPABASE_URL.includes('YOUR_') || CONFIG.SUPABASE_ANON_KEY.includes('YOUR_')){
+    return showError($('globalError'), 'عدّل SUPABASE_URL و SUPABASE_ANON_KEY داخل CONFIG أعلى السكربت.');
+  }
+  if (!window.supabase || typeof QRCode === 'undefined'){
+    return showError($('globalError'), 'تعذّر تحميل المكتبات من الإنترنت. تحقق من الاتصال ثم أعد تحميل الصفحة.');
+  }
+
+  db = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
+  loadProducts();
+
+  // استعادة طلب معلّق (مثلاً بعد تحديث الصفحة)
+  try{
+    const saved = JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEY) || 'null');
+    if (saved?.id && saved?.token){
+      activeTransfer = saved;
+      const { data } = await db.from(CONFIG.TABLE).select('status, completed_at').eq('id', saved.id).single();
+      if (data?.status === 'completed') showDone(data.completed_at);
+      else showQR();
+    }
+  }catch(e){ localStorage.removeItem(CONFIG.STORAGE_KEY); }
+}
+init();
+</script>
+</body>
+</html>

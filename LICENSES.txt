@@ -1,0 +1,7 @@
+Third-party libraries in this folder (both are used unmodified):
+
+html5-qrcode.min.js  - html5-qrcode 2.3.8, by Minhaz (mebjas). Apache License 2.0.
+                       https://github.com/mebjas/html5-qrcode   Opens the camera and reads QR codes.
+
+qrcode.min.js        - qrcode-generator 1.4.4, by Kazuhiko Arase. MIT License. Minified with terser.
+                       https://github.com/kazuhikoarase/qrcode-generator   Draws QR codes.

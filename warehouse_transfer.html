@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1B2A34">
+<title>استلام العهدة — أمين المستودع</title>
+
+<!-- الخط -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;700&display=swap" rel="stylesheet">
+
+<!-- ========== المكتبات الخارجية (CDN) ========== -->
+<!-- Supabase JS -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<!-- html5-qrcode : فتح الكاميرا وقراءة كود QR -->
+<script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+
+<style>
+  :root{
+    --ink:#1B2A34;
+    --ink-2:#52646F;
+    --ground:#E4E8EA;
+    --paper:#FFFFFF;
+    --line:#C9D1D6;
+    --signal:#F2C200;
+    --ok:#1F7A4D;
+    --bad:#B42318;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    font-family:"IBM Plex Sans Arabic",Tahoma,system-ui,sans-serif;
+    background:var(--ground);color:var(--ink);line-height:1.7;min-height:100vh;
+    padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+  }
+  .app{max-width:520px;margin:0 auto;padding:20px 16px 40px}
+  h1{font-size:1.45rem;margin:8px 0 4px;font-weight:700}
+  .sub{margin:0 0 20px;color:var(--ink-2)}
+  .hidden{display:none !important}
+
+  .btn{
+    display:block;width:100%;font:inherit;font-weight:700;font-size:1.1rem;
+    padding:16px;border-radius:10px;border:0;cursor:pointer;
+  }
+  .btn:focus-visible{outline:3px solid var(--signal);outline-offset:2px}
+  .btn-primary{background:var(--signal);color:var(--ink)}
+  .btn-dark{background:var(--ink);color:#fff}
+  .btn-ghost{background:transparent;color:var(--ink);border:1.5px solid var(--ink);margin-top:12px}
+
+  /* ---------- الكاميرا ---------- */
+  .scanner{
+    background:var(--ink);border-radius:16px;padding:10px;margin:16px 0;
+  }
+  #reader{width:100%;border-radius:10px;overflow:hidden;background:#000}
+  #reader video{border-radius:10px}
+  .scan-hint{color:#B9C5CC;text-align:center;margin:10px 0 4px}
+
+  /* ---------- الرسائل ---------- */
+  .msg{border-radius:10px;padding:12px 14px;margin:14px 0}
+  .msg-error{background:#FDECEA;color:var(--bad);border:1px solid #F3B8B2}
+  .msg-warn{background:#FFF6D6;color:#6B5200;border:1px solid #EBD27A}
+  .msg-busy{background:#fff;border:1px solid var(--line);text-align:center}
+
+  /* ---------- نتيجة الاستلام ---------- */
+  .result{background:var(--ok);color:#fff;border-radius:16px;padding:24px 18px;text-align:center}
+  .result svg{width:80px;height:80px}
+  .result h2{margin:8px 0 2px;font-size:1.5rem}
+  .result p{margin:0;opacity:.9}
+  .receipt{background:#fff;color:var(--ink);border-radius:12px;margin-top:16px;padding:8px 16px;text-align:right}
+  .receipt ul{list-style:none;margin:0;padding:0}
+  .receipt li{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--line)}
+  .receipt li:last-child{border-bottom:0}
+</style>
+</head>
+<body>
+<main class="app">
+
+  <h1>استلام العهدة</h1>
+  <p class="sub">امسح رمز QR من جوال المندوب لتأكيد تسليم الكميات.</p>
+
+  <div id="globalError" class="msg msg-error hidden" role="alert"></div>
+
+  <!-- ========== شاشة المسح ========== -->
+  <section id="viewScan">
+    <button type="button" class="btn btn-primary" id="startBtn">فتح الكاميرا</button>
+
+    <div id="scannerBox" class="scanner hidden">
+      <div id="reader"></div>
+      <p class="scan-hint">وجّه الكاميرا نحو الرمز على جوال المندوب</p>
+    </div>
+    <button type="button" class="btn btn-ghost hidden" id="stopBtn">إغلاق الكاميرا</button>
+
+    <div id="statusMsg" class="msg hidden" role="status"></div>
+  </section>
+
+  <!-- ========== نتيجة النجاح ========== -->
+  <section id="viewResult" class="hidden">
+    <div class="result">
+      <svg viewBox="0 0 96 96" aria-hidden="true">
+        <circle cx="48" cy="48" r="44" fill="#fff"/>
+        <path d="M28 49l14 14 27-30" fill="none" stroke="#1F7A4D" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <h2>تم تأكيد الاستلام</h2>
+      <p id="resRep"></p>
+    </div>
+    <div class="receipt"><ul id="resItems"></ul></div>
+    <button type="button" class="btn btn-dark" id="againBtn" style="margin-top:16px">مسح عهدة أخرى</button>
+  </section>
+
+</main>
+
+<script>
+/* =====================================================================
+   إعدادات المشروع — عدّل هذه القيم فقط
+   ===================================================================== */
+const CONFIG = {
+  SUPABASE_URL: 'https://YOUR_PROJECT_ID.supabase.co', // رابط مشروعك
+  SUPABASE_ANON_KEY: 'YOUR_SUPABASE_ANON_KEY',          // المفتاح العام (anon)
+  TABLE: 'stock_transfers',
+  QR_PREFIX: 'STT1:',   // يجب أن تطابق البادئة المستخدمة في شاشة المندوب
+  // false = تحديث مباشر للجدول (update) كما هو مطلوب
+  // true  = استدعاء الدالة complete_transfer (أكثر أماناً — انظر ملف supabase_setup.sql)
+  USE_RPC: false
+};
+
+const $ = (id) => document.getElementById(id);
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+let db = null;          // عميل Supabase
+let scanner = null;     // كائن Html5Qrcode
+let scanning = false;   // الكاميرا تعمل الآن؟
+let busy = false;       // يمنع معالجة نفس الكود مرتين
+let lastBadAt = 0;      // لتجنب تكرار رسالة "كود غير صالح"
+
+/* ---------------------------- رسائل الحالة ---------------------------- */
+function setStatus(type, text){
+  const el = $('statusMsg');
+  el.className = 'msg msg-' + type;   // error | warn | busy
+  el.textContent = text;
+}
+function clearStatus(){ $('statusMsg').className = 'msg hidden'; $('statusMsg').textContent = ''; }
+
+/* ---------------------------- تشغيل / إيقاف الكاميرا ---------------------------- */
+async function startScanner(){
+  clearStatus();
+  if (scanning) return;
+  busy = false;
+
+  // يجب إظهار الحاوية قبل بدء الكاميرا
+  $('scannerBox').classList.remove('hidden');
+  $('stopBtn').classList.remove('hidden');
+  $('startBtn').classList.add('hidden');
+
+  try{
+    scanner = new Html5Qrcode('reader', {
+      formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
+      verbose: false
+    });
+
+    await scanner.start(
+      { facingMode: 'environment' },                 // الكاميرا الخلفية
+      {
+        fps: 10,
+        qrbox: (w, h) => {                           // مربع المسح = 75% من أصغر بُعد
+          const s = Math.floor(Math.min(w, h) * 0.75);
+          return { width: s, height: s };
+        }
+      },
+      onScanSuccess,
+      () => {}                                       // أخطاء الإطارات الفارغة: نتجاهلها
+    );
+    scanning = true;
+  }catch(err){
+    console.error(err);
+    await stopScanner();
+    const denied = /Permission|NotAllowed/i.test(String(err));
+    setStatus('error', denied
+      ? 'تم رفض إذن الكاميرا. اسمح للموقع باستخدام الكاميرا من إعدادات المتصفح ثم حاول مجدداً.'
+      : 'تعذّر تشغيل الكاميرا. تأكد أن الصفحة تعمل عبر HTTPS وأن الكاميرا غير مستخدمة في تطبيق آخر.');
+  }
+}
+
+async function stopScanner(){
+  try{
+    if (scanner && scanning) await scanner.stop();
+    if (scanner) scanner.clear();
+  }catch(e){ /* تجاهل */ }
+  scanner = null; scanning = false;
+  $('scannerBox').classList.add('hidden');
+  $('stopBtn').classList.add('hidden');
+  $('startBtn').classList.remove('hidden');
+}
+
+/* ---------------------------- عند قراءة كود ---------------------------- */
+async function onScanSuccess(decodedText){
+  if (busy) return;
+
+  // 1) تحقق من أن الكود يخصّ نظامنا وأن التوكن بصيغة صحيحة
+  const text = (decodedText || '').trim();
+  const token = text.startsWith(CONFIG.QR_PREFIX) ? text.slice(CONFIG.QR_PREFIX.length) : '';
+  if (!UUID_RE.test(token)){
+    if (Date.now() - lastBadAt > 2500){
+      lastBadAt = Date.now();
+      setStatus('warn', 'هذا الرمز ليس رمز استلام عهدة صالحاً. امسح الرمز من شاشة المندوب.');
+    }
+    return;                                  // نكمل المسح
+  }
+
+  // 2) رمز صحيح: أوقف الكاميرا وأرسل التحديث
+  busy = true;
+  if (navigator.vibrate) navigator.vibrate(120);
+  await stopScanner();
+  setStatus('busy', 'جارٍ تأكيد الاستلام…');
+
+  try{
+    const rows = await completeTransfer(token);
+
+    if (!rows.length){
+      // لم يتطابق أي سجل بحالة pending
+      setStatus('error', 'الرمز غير صالح أو تم استلام هذه العهدة مسبقاً.');
+      busy = false;
+      return;
+    }
+    showResult(rows[0]);
+  }catch(err){
+    console.error(err);
+    setStatus('error', 'تعذّر تأكيد الاستلام: ' + (err.message || 'خطأ غير معروف') + '. تحقق من الاتصال والصلاحيات ثم أعد المسح.');
+    busy = false;
+  }
+}
+
+/* ---------------------------- تحديث Supabase ---------------------------- */
+async function completeTransfer(token){
+  // الخيار الآمن: دالة في قاعدة البيانات
+  if (CONFIG.USE_RPC){
+    const { data, error } = await db.rpc('complete_transfer', { p_token: token });
+    if (error) throw error;
+    return data || [];
+  }
+
+  // الخيار المباشر: update على الجدول بمطابقة verification_token
+  const patch = { status: 'completed', completed_at: new Date().toISOString() };
+  const { data: { session } } = await db.auth.getSession();
+  if (session?.user) patch.received_by = session.user.id;   // من استلم العهدة
+
+  const { data, error } = await db.from(CONFIG.TABLE)
+    .update(patch)
+    .eq('verification_token', token)   // مطابقة التوكن المقروء من QR
+    .eq('status', 'pending')           // لا نقبل إلا الطلبات المعلّقة (يمنع الاستلام المزدوج)
+    .select('id, rep_name, items, completed_at');
+
+  if (error) throw error;
+  return data || [];
+}
+
+/* ---------------------------- عرض النتيجة ---------------------------- */
+function showResult(row){
+  clearStatus();
+  $('resRep').textContent = row.rep_name ? 'المندوب: ' + row.rep_name : '';
+  const ul = $('resItems'); ul.innerHTML = '';
+  (row.items || []).forEach(it => {
+    const li = document.createElement('li');
+    const a = document.createElement('span'); a.textContent = it.product;
+    const b = document.createElement('strong'); b.textContent = it.qty;
+    li.append(a, b);
+    ul.appendChild(li);
+  });
+  if (navigator.vibrate) navigator.vibrate([100, 60, 100]);
+  $('viewScan').classList.add('hidden');
+  $('viewResult').classList.remove('hidden');
+}
+
+function scanAnother(){
+  $('viewResult').classList.add('hidden');
+  $('viewScan').classList.remove('hidden');
+  busy = false;
+  startScanner();
+}
+
+/* ---------------------------- التهيئة ---------------------------- */
+function init(){
+  $('startBtn').addEventListener('click', startScanner);
+  $('stopBtn').addEventListener('click', stopScanner);
+  $('againBtn').addEventListener('click', scanAnother);
+
+  if (CONFIG.SUPABASE_URL.includes('YOUR_') || CONFIG.SUPABASE_ANON_KEY.includes('YOUR_')){
+    $('globalError').textContent = 'عدّل SUPABASE_URL و SUPABASE_ANON_KEY داخل CONFIG أعلى السكربت.';
+    $('globalError').classList.remove('hidden');
+    $('startBtn').disabled = true; return;
+  }
+  if (!window.supabase || typeof Html5Qrcode === 'undefined'){
+    $('globalError').textContent = 'تعذّر تحميل المكتبات من الإنترنت. تحقق من الاتصال ثم أعد تحميل الصفحة.';
+    $('globalError').classList.remove('hidden');
+    $('startBtn').disabled = true; return;
+  }
+  db = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
+}
+init();
+</script>
+</body>
+</html>
